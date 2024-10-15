@@ -1,25 +1,27 @@
 package main
 
 import (
-  "fmt"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+	"image/color"
 )
 
-//TIP To run your code, right-click the code and select <b>Run</b>. Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.
-
 func main() {
-  //TIP Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined or highlighted text
-  // to see how GoLand suggests fixing it.
-  s := "gopher"
-  fmt.Println("Hello and welcome, %s!", s)
 
-  for i := 1; i <= 5; i++ {
-	//TIP You can try debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-	// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>. To start your debugging session, 
-	// right-click your code in the editor and select the <b>Debug</b> option. 
-	fmt.Println("i =", 100/i)
-  }
+	a := app.New()
+	okno := a.NewWindow("Koszykówka")
+
+	circle := canvas.NewCircle(color.RGBA{255, 165, 0, 255})
+	circle.StrokeColor = color.RGBA{0, 0, 0, 255}
+	circle.StrokeWidth = 2
+	circle.Resize(fyne.NewSize(50, 50))
+
+	content := container.NewVBox(widget.NewLabel("Oto koło:"), circle)
+
+	okno.SetContent(content)
+	okno.Resize(fyne.NewSize(100, 100))
+	okno.ShowAndRun()
 }
-
-//TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.
-// Also, you can try interactive lessons for GoLand by selecting 'Help | Learn IDE Features' from the main menu.
