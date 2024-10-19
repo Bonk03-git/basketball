@@ -3,6 +3,8 @@ package main
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"math"
+	"math/rand"
+	"time"
 )
 
 func rysuj_linie_na_pilce(posX float64, posY float64, radius float64, alpha1 float64, alpha2 float64) {
@@ -17,6 +19,8 @@ var ball struct {
 
 func main() {
 
+	rand.NewSource(time.Now().UnixNano())
+
 	const szerokosc int32 = 1600
 	const wysokosc int32 = 900
 
@@ -24,7 +28,7 @@ func main() {
 	defer rl.CloseWindow()
 
 	ball.radius = 30
-	ball.posX = 200
+	ball.posX = float64(rand.Intn(int(szerokosc * 3 / 4)))
 	ball.posY = float64(wysokosc - 200)
 
 	var zmiana_kata float64 = 0
@@ -34,7 +38,7 @@ func main() {
 	for !rl.WindowShouldClose() {
 
 		// changing angle and position
-		ball.posX += 0.02
+		//ball.posX += 0.02
 		zmiana_kata = 0.02
 
 		//nadpisanie kata
