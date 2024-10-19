@@ -5,32 +5,44 @@ import (
 	"math"
 )
 
+func rysuj_linie_na_pilce(posX float64, posY float64, radius float64, alpha1 float64, alpha2 float64) {
+	rl.DrawLine(int32(posX-radius+(radius*math.Sqrt(2-2*math.Cos(alpha1*math.Pi/180)))*math.Cos(((180-alpha1)/2)*math.Pi/180)), int32(posY-(radius*math.Sqrt(2-2*math.Cos(alpha1*math.Pi/180)))*math.Sin(((180-alpha1)/2)*math.Pi/180)), int32(posX-radius+(radius*math.Sqrt(2-2*math.Cos(alpha2*math.Pi/180)))*math.Cos(((180-alpha2)/2)*math.Pi/180)), int32(posY-(radius*math.Sqrt(2-2*math.Cos(alpha2*math.Pi/180)))*math.Sin(((180-alpha2)/2)*math.Pi/180)), rl.Black)
+}
+
+var ball struct {
+	radius float64
+	posX   float64
+	posY   float64
+}
+
 func main() {
 
-	var szerokosc int32 = 1600
-	var wysokosc int32 = 900
+	const szerokosc int32 = 1600
+	const wysokosc int32 = 900
 
 	rl.InitWindow(szerokosc, wysokosc, "Koszykówka")
 	defer rl.CloseWindow()
 
-	var radius float64 = 30
-	var posX float64 = 200
-	var posY float64 = float64(wysokosc - 200)
+	ball.radius = 30
+	ball.posX = 200
+	ball.posY = float64(wysokosc - 200)
+
 	var zmiana_kata float64 = 0
-	alpha := [5]float64{0, 60, 120, 240, 300}
+	alpha := [8]float64{0, 60, 90, 120, 180, 240, 270, 300}
 
 	// Główna pętla gry
 	for !rl.WindowShouldClose() {
 
-		// Rysowanie
-		posX += 0.02
+		// changing angle and position
+		ball.posX += 0.02
 		zmiana_kata = 0.02
 
-		for i := 0; i < 5; i++ {
+		//nadpisanie kata
+		for i := 0; i < 8; i++ {
 			alpha[i] += zmiana_kata
 		}
 
-		for i := 0; i < 5; i++ {
+		for i := 0; i < 8; i++ {
 			if alpha[i] > 360 {
 				for j := 0; j < 1; j++ {
 					if alpha[i] > 360 {
@@ -45,14 +57,13 @@ func main() {
 		rl.ClearBackground(rl.RayWhite) // Czyszczenie tła
 
 		// Pilka
-		rl.DrawCircle(int32(posX), int32(posY), float32(radius), rl.Orange)
+		rl.DrawCircle(int32(ball.posX), int32(ball.posY), float32(ball.radius), rl.Orange)
 
-		// radius * math.Sqrt(2-2*math.Cos(alpha[0]*math.Pi/180))
+		rysuj_linie_na_pilce(ball.posX, ball.posY, ball.radius, alpha[0], alpha[4])
+		rysuj_linie_na_pilce(ball.posX, ball.posY, ball.radius, alpha[1], alpha[7])
+		rysuj_linie_na_pilce(ball.posX, ball.posY, ball.radius, alpha[2], alpha[6])
+		rysuj_linie_na_pilce(ball.posX, ball.posY, ball.radius, alpha[3], alpha[5])
 
-		rl.DrawLine(int32(posX-radius+(radius*math.Sqrt(2-2*math.Cos(alpha[0]*math.Pi/180)))*math.Cos(((180-alpha[0])/2)*math.Pi/180)), int32(posY-(radius*math.Sqrt(2-2*math.Cos(alpha[0]*math.Pi/180)))*math.Sin(((180-alpha[0])/2)*math.Pi/180)), int32(posX+radius-(radius*math.Sqrt(2-2*math.Cos(alpha[0]*math.Pi/180)))*math.Cos(((180-alpha[0])/2)*math.Pi/180)), int32(posY+(radius*math.Sqrt(2-2*math.Cos(alpha[0]*math.Pi/180)))*math.Sin(((180-alpha[0])/2)*math.Pi/180)), rl.Black)
-		rl.DrawLine(int32(posX+(radius*math.Sqrt(2-2*math.Cos(alpha[0]*math.Pi/180)))*math.Sin(((180-alpha[0])/2)*math.Pi/180)), int32(posY-radius+(radius*math.Sqrt(2-2*math.Cos(alpha[0]*math.Pi/180)))*math.Cos(((180-alpha[0])/2)*math.Pi/180)), int32(posX-(radius*math.Sqrt(2-2*math.Cos(alpha[0]*math.Pi/180)))*math.Sin(((180-alpha[0])/2)*math.Pi/180)), int32(posY+radius-(radius*math.Sqrt(2-2*math.Cos(alpha[0]*math.Pi/180)))*math.Cos(((180-alpha[0])/2)*math.Pi/180)), rl.Black)
-		rl.DrawLine(int32(posX-radius+(radius*math.Sqrt(2-2*math.Cos(alpha[1]*math.Pi/180)))*math.Cos(((180-alpha[1])/2)*math.Pi/180)), int32(posY-(radius*math.Sqrt(2-2*math.Cos(alpha[1]*math.Pi/180)))*math.Sin(((180-alpha[1])/2)*math.Pi/180)), int32(posX-radius+(radius*math.Sqrt(2-2*math.Cos(alpha[4]*math.Pi/180)))*math.Cos(((180-alpha[4])/2)*math.Pi/180)), int32(posY-(radius*math.Sqrt(2-2*math.Cos(alpha[4]*math.Pi/180)))*math.Sin(((180-alpha[4])/2)*math.Pi/180)), rl.Black)
-		rl.DrawLine(int32(posX-radius+(radius*math.Sqrt(2-2*math.Cos(alpha[2]*math.Pi/180)))*math.Cos(((180-alpha[2])/2)*math.Pi/180)), int32(posY-(radius*math.Sqrt(2-2*math.Cos(alpha[2]*math.Pi/180)))*math.Sin(((180-alpha[2])/2)*math.Pi/180)), int32(posX-radius+(radius*math.Sqrt(2-2*math.Cos(alpha[3]*math.Pi/180)))*math.Cos(((180-alpha[3])/2)*math.Pi/180)), int32(posY-(radius*math.Sqrt(2-2*math.Cos(alpha[3]*math.Pi/180)))*math.Sin(((180-alpha[3])/2)*math.Pi/180)), rl.Black)
 		rl.EndDrawing()
 	}
 }
