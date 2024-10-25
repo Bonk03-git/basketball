@@ -64,6 +64,9 @@ func main() {
 
 	var punkty_przylozenia_wektorow [3]Punkt_przylozenia
 	var wektory_sily [3]Wektor_sily
+	var sila_ruszajaca [3]float64
+	var wektory_sily_ruszajacej [3]Wektor
+	var wektory_sily_obrotowej [3]Wektor
 	var przyspieszenia_z_wektorow [3]Wektor
 	var momenty_z_wektorow [3]Wektor
 	var przyspieszenia_katowe_z_wektorow [3]Wektor
@@ -82,29 +85,43 @@ func main() {
 	for i := 0; i < 3; i++ {
 
 		punkty_przylozenia_wektorow[i] = Punkt_przylozenia{ // wyznaczane przez gracza
-			kat_fi:   math.Pi / 2,
-			kat_teta: math.Pi / 4,
+			kat_fi:   math.Pi / 4,
+			kat_teta: 0,
 		}
 
 		wektory_sily[i] = Wektor_sily{
-			dlugosc_x:     100, // wyznacza gracz
-			dlugosc_y:     100, // wyznacza gracz
-			dlugosc_z:     100, // wyznacza gracz
+			dlugosc_x:     -100, // wyznacza gracz
+			dlugosc_y:     0,    // wyznacza gracz
+			dlugosc_z:     0,    // wyznacza gracz
 			przylozenie_x: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Cos(punkty_przylozenia_wektorow[i].kat_fi),
 			przylozenie_y: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Sin(punkty_przylozenia_wektorow[i].kat_fi),
 			przylozenie_z: pilka.promien * math.Sin(punkty_przylozenia_wektorow[i].kat_teta),
 		}
 
+		sila_ruszajaca[i] = wektory_sily[i].dlugosc_x*wektory_sily[i].przylozenie_x/pilka.promien + wektory_sily[i].dlugosc_y*wektory_sily[i].przylozenie_y/pilka.promien + wektory_sily[i].dlugosc_z*wektory_sily[i].przylozenie_z/pilka.promien
+
+		wektory_sily_ruszajacej[i] = Wektor{
+			x: sila_ruszajaca[i] * wektory_sily[i].przylozenie_x / pilka.promien,
+			y: sila_ruszajaca[i] * wektory_sily[i].przylozenie_y / pilka.promien,
+			z: sila_ruszajaca[i] * wektory_sily[i].przylozenie_z / pilka.promien,
+		}
+
+		wektory_sily_obrotowej[i] = Wektor{
+			x: wektory_sily[i].dlugosc_x - wektory_sily_ruszajacej[i].x,
+			y: wektory_sily[i].dlugosc_x - wektory_sily_ruszajacej[i].y,
+			z: wektory_sily[i].dlugosc_x - wektory_sily_ruszajacej[i].z,
+		}
+
 		przyspieszenia_z_wektorow[i] = Wektor{
-			x: wektory_sily[i].dlugosc_x / pilka.masa,
-			y: wektory_sily[i].dlugosc_y / pilka.masa,
-			z: wektory_sily[i].dlugosc_z / pilka.masa,
+			x: wektory_sily_ruszajacej[i].x / pilka.masa,
+			y: wektory_sily_ruszajacej[i].y / pilka.masa,
+			z: wektory_sily_ruszajacej[i].z / pilka.masa,
 		}
 
 		momenty_z_wektorow[i] = Wektor{
-			x: wektory_sily[i].przylozenie_y*wektory_sily[i].dlugosc_z - wektory_sily[i].przylozenie_z*wektory_sily[i].dlugosc_y,
-			y: -wektory_sily[i].przylozenie_x*wektory_sily[i].dlugosc_z + wektory_sily[i].przylozenie_z*wektory_sily[i].dlugosc_x,
-			z: wektory_sily[i].przylozenie_x*wektory_sily[i].dlugosc_y - wektory_sily[i].przylozenie_y*wektory_sily[i].dlugosc_x,
+			x: wektory_sily[i].przylozenie_y*wektory_sily_obrotowej[i].z - wektory_sily[i].przylozenie_z*wektory_sily_obrotowej[i].y,
+			y: -wektory_sily[i].przylozenie_x*wektory_sily_obrotowej[i].z + wektory_sily[i].przylozenie_z*wektory_sily_obrotowej[i].x,
+			z: wektory_sily[i].przylozenie_x*wektory_sily_obrotowej[i].y - wektory_sily[i].przylozenie_y*wektory_sily_obrotowej[i].x,
 		}
 
 		przyspieszenia_katowe_z_wektorow[i] = Wektor{
