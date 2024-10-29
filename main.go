@@ -2,7 +2,9 @@ package main
 
 // PAMIĘTAĆ ZAMIENIAĆ WSPOLRZEDNE X Z Y NA KONIEC PROJEKTU!!!
 import (
+	"github.com/g3n/engine/math32"
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/go-gl/mathgl/mgl32"
 	"math"
 	"math/rand"
 	"time"
@@ -49,17 +51,17 @@ func main() {
 	const wysokosc int = 900
 	const czas_dzialania_sily_na_pilke = 0.5
 	const krok_czasowy = 0.01
-	const g = -981
+	const g = -9.81
 
 	pilka := Kula{
-		promien: 12,                            // pixele
-		posX:    float64(rand.Intn(wysokosc)),  // pixele
-		posY:    float64(rand.Intn(szerokosc)), // pixele
-		posZ:    200,                           // pixele
-		rotX:    0,                             // radiany
-		rotY:    0,                             // radiany
-		rotZ:    0,                             // radiany
-		masa:    0.5,                           // kilogramy
+		promien: 0.12, // metry
+		posX:    0,    // pixele float64(rand.Intn(10))
+		posY:    0,    // pixele float64(rand.Intn(10))
+		posZ:    10,   // pixele
+		rotX:    0,    // radiany
+		rotY:    0,    // radiany
+		rotZ:    0,    // radiany
+		masa:    0.5,  // kilogramy
 	}
 
 	var punkty_przylozenia_wektorow [3]Punkt_przylozenia
@@ -80,7 +82,8 @@ func main() {
 		y: 0,
 		z: 0,
 	}
-	var I = 2 / 5 * (pilka.masa) * pilka.promien * pilka.promien
+
+	var I = 2.0 / 5.0 * pilka.masa * pilka.promien * pilka.promien
 
 	for i := 0; i < 3; i++ {
 
@@ -90,7 +93,7 @@ func main() {
 		}
 
 		wektory_sily[i] = Wektor_sily{
-			dlugosc_x:     -100, // wyznacza gracz
+			dlugosc_x:     -0.1, // wyznacza gracz
 			dlugosc_y:     0,    // wyznacza gracz
 			dlugosc_z:     0,    // wyznacza gracz
 			przylozenie_x: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Cos(punkty_przylozenia_wektorow[i].kat_fi),
@@ -108,8 +111,8 @@ func main() {
 
 		wektory_sily_obrotowej[i] = Wektor{
 			x: wektory_sily[i].dlugosc_x - wektory_sily_ruszajacej[i].x,
-			y: wektory_sily[i].dlugosc_x - wektory_sily_ruszajacej[i].y,
-			z: wektory_sily[i].dlugosc_x - wektory_sily_ruszajacej[i].z,
+			y: wektory_sily[i].dlugosc_y - wektory_sily_ruszajacej[i].y,
+			z: wektory_sily[i].dlugosc_z - wektory_sily_ruszajacej[i].z,
 		}
 
 		przyspieszenia_z_wektorow[i] = Wektor{
@@ -156,34 +159,146 @@ func main() {
 	}
 
 	rl.InitWindow(int32(szerokosc), int32(wysokosc), "Koszykówka")
-	defer rl.CloseWindow()
-	// Glowna petla gry
+
+	// Widok kamery na obszar 3D
+	camera := rl.Camera{
+		Position:   rl.NewVector3(1.0, 1.0, 0.0), // pozycja kamery
+		Target:     rl.NewVector3(0, 0, 0),       // punkt patrzenia
+		Up:         rl.NewVector3(0.0, 1.0, 0.0), // Camera up vector (rotation towards target)
+		Fovy:       45.0,                         // Camera field-of-view Y
+		Projection: rl.CameraPerspective,         // Camera mode type
+	}
+
+	rl.DisableCursor()
+
+	// Create a sphere mesh and model
+	sphereMesh := rl.GenMeshSphere(0.12, 32, 32)
+	sphereModel := rl.LoadModelFromMesh(sphereMesh)
+
+	// Load the basketball texture
+	texture := rl.LoadTexture("basketball.png") // Ensure this file exists
+
+	// Access the materials using GetMaterials()
+	materials := sphereModel.GetMaterials()
+
+	// Use SetMaterialTexture to set the texture
+	rl.SetMaterialTexture(&materials[0], rl.MapDiffuse, texture)
+
+	basketMesh := rl.GenMeshCube(0.1, 1.05, 1.8)
+	basketmodel := rl.LoadModelFromMesh(basketMesh)
+
+	texture_2 := rl.LoadTexture("kosz.jpg")
+
+	materials = basketmodel.GetMaterials()
+	// Use SetMaterialTexture to set the texture
+	rl.SetMaterialTexture(&materials[0], rl.MapDiffuse, texture_2)
+
+	// Set initial rotation angle
+	rotationAngle := float32(0.0)
+	rotationAxis := rl.NewVector3(1.0, 1.0, 0.0)
+	rotationAngle_2 := float32(0.0)
+	rotationAxis_2 := rl.NewVector3(0.0, 1.0, 0.0)
+
+	rl.SetTargetFPS(60) // Set our game to run at 60 frames-per-second
+
+	// Main game loop
 	for !rl.WindowShouldClose() {
+
+		rl.UpdateCamera(&camera, rl.CameraFree)
+
+		if rl.IsKeyPressed(rl.KeyZ) {
+			camera.Target = rl.NewVector3(0.0, 0.0, 0.0)
+		}
 
 		pilka.posX = pilka.posX + predkosci_pilki.x*krok_czasowy
 		pilka.posY = pilka.posY + predkosci_pilki.y*krok_czasowy
 		pilka.posZ = pilka.posZ + predkosci_pilki.z*krok_czasowy + g*krok_czasowy*krok_czasowy/2
-		pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy // pamietac skasowac radiany powyzej 2pi
-		pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy // to co wyzej
-		pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy // to co wyzej
 		predkosci_pilki.z = predkosci_pilki.z + g*krok_czasowy
+		pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
+		pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
+		pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
 
+		pilka.rotX = pilnowanie_zakresu_kata(pilka.rotX)
+		pilka.rotY = pilnowanie_zakresu_kata(pilka.rotY)
+		pilka.rotZ = pilnowanie_zakresu_kata(pilka.rotZ)
+
+		//kwaterniony
+
+		q_x := mgl32.QuatRotate(float32(pilka.rotX), mgl32.Vec3{1, 0, 0})
+		q_y := mgl32.QuatRotate(float32(pilka.rotY), mgl32.Vec3{0, 1, 0})
+		q_z := mgl32.QuatRotate(float32(pilka.rotZ), mgl32.Vec3{0, 0, 1})
+		q_wynik := q_z.Mul(q_y).Mul(q_x)
+
+		kat_obrotu := 2 * math.Acos(float64(q_wynik.W))
+		var os_obrotu math32.Vector3
+
+		if kat_obrotu > 0 {
+			// Normalizacja wektora osi obrotu
+			s := math.Sqrt(float64(1 - q_wynik.W*q_wynik.W))
+			os_obrotu = *math32.NewVector3(q_wynik.X()/float32(s), q_wynik.Y()/float32(s), q_wynik.Z()/float32(s))
+		} else {
+			// Oś obrotu jest nieokreślona, możemy przyjąć dowolną oś
+			os_obrotu = *math32.NewVector3(1, 0, 0) // Przykładowa oś
+		}
+
+		rotationAxis = rl.NewVector3(os_obrotu.X, os_obrotu.Y, os_obrotu.Z)
+		rotationAngle = float32(kat_obrotu)
+		println(rotationAngle)
+
+		// Draw
 		rl.BeginDrawing()
-		rl.ClearBackground(rl.Color{R: 255, G: 79, B: 45, A: 255}) // Czyszczenie tła
 
-		// os wspolrzednych
-		rl.DrawCircleLines(int32(szerokosc/50), int32(szerokosc/50), float32(szerokosc/200), rl.White)
-		rl.DrawCircle(int32(szerokosc/50), int32(szerokosc/50), float32(szerokosc/400), rl.White)
-		rl.DrawLine(int32(szerokosc/40), int32(szerokosc/50), int32(szerokosc/15), int32(szerokosc/50), rl.White)
-		rl.DrawLine(int32(szerokosc/50), int32(szerokosc/40), int32(szerokosc/50), int32(szerokosc/15), rl.White)
-		wektor_1_osi_x := rl.Vector2{float32(szerokosc / 50), float32(szerokosc / 15)}
-		wektor_2_osi_x := rl.Vector2{float32(szerokosc / 40), float32(szerokosc / 20)}
-		wektor_3_osi_x := rl.Vector2{float32(szerokosc * 3 / 200), float32(szerokosc / 20)}
+		rl.ClearBackground(rl.RayWhite)
 
-		rl.DrawTriangle(wektor_1_osi_x, wektor_2_osi_x, wektor_3_osi_x, rl.White)
-		// boisko
-		rl.DrawRectangle(int32(szerokosc*15/16), int32(wysokosc/12), int32(szerokosc/320), int32(wysokosc*10/12), rl.White)
+		rl.BeginMode3D(camera)
+
+		// Draw the model with rotation
+		rl.DrawModelEx(
+			sphereModel,
+			rl.NewVector3(1.0, 0.0, 0.0), // Position
+			rotationAxis,                 // Rotation axis
+			rotationAngle,                // Rotation angle
+			rl.NewVector3(1.0, 1.0, 1.0), // Scale
+			rl.White,                     // Tint
+		)
+
+		rl.DrawModelEx(
+			basketmodel,
+			rl.NewVector3(10.0, 0.0, 0.0), // Position
+			rotationAxis_2,                // Rotation axis
+			rotationAngle_2,               // Rotation angle
+			rl.NewVector3(1.0, 1.0, 1.0),  // Scale
+			rl.White,                      // Tint
+		)
+
+		// Optionally, draw a grid for reference
+		rl.DrawGrid(100, 1.0)
+
+		rl.EndMode3D()
+
+		rl.DrawText("Rotating Basketball", 10, 10, 20, rl.DarkGray)
 
 		rl.EndDrawing()
 	}
+
+	// De-initialization
+	rl.UnloadTexture(texture)   // Unload texture
+	rl.UnloadModel(sphereModel) // Unload model
+
+	rl.CloseWindow() // Close window and OpenGL context
+}
+
+func pilnowanie_zakresu_kata(rotacja float64) float64 {
+	for i := 0; i < 1; i++ {
+
+		if rotacja > 2*math.Pi {
+			rotacja = rotacja - 2*math.Pi
+			i--
+		}
+		if rotacja < 0 {
+			rotacja = rotacja + 2*math.Pi
+			i--
+		}
+	}
+	return rotacja
 }
