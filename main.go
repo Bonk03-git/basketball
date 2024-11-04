@@ -100,7 +100,7 @@ func main() {
 		}
 
 		wektory_sily[i] = Wektor_sily{
-			dlugosc_x:     500, // wyznacza gracz
+			dlugosc_x:     100, // wyznacza gracz
 			dlugosc_y:     0,   // wyznacza gracz
 			dlugosc_z:     0,   // wyznacza gracz
 			przylozenie_x: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Sin(punkty_przylozenia_wektorow[i].kat_fi),
@@ -108,48 +108,6 @@ func main() {
 			przylozenie_z: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Cos(punkty_przylozenia_wektorow[i].kat_fi),
 		}
 
-		/*fx := wektory_sily[i].dlugosc_x * wektory_sily[i].przylozenie_x / pilka.promien
-		fy := wektory_sily[i].dlugosc_y * wektory_sily[i].przylozenie_y / pilka.promien
-		fz := wektory_sily[i].dlugosc_z * wektory_sily[i].przylozenie_z / pilka.promien
-		sila_ruszajaca[i] = fx + fy + fz
-
-
-		wektory_sily_ruszajacej[i] = Wektor{
-			x: sila_ruszajaca[i] * wektory_sily[i].przylozenie_x / pilka.promien,
-			y: sila_ruszajaca[i] * wektory_sily[i].przylozenie_y / pilka.promien,
-			z: sila_ruszajaca[i] * wektory_sily[i].przylozenie_z / pilka.promien,
-		}
-
-		przyspieszenia_z_wektorow[i] = Wektor{
-			x: wektory_sily_ruszajacej[i].x / pilka.masa,
-			y: wektory_sily_ruszajacej[i].y / pilka.masa,
-			z: wektory_sily_ruszajacej[i].z / pilka.masa,
-		}
-
-		momenty_z_wektorow[i] = Wektor{
-			x: wektory_sily[i].przylozenie_y*wektory_sily_ruszajacej[i].z - wektory_sily[i].przylozenie_z*wektory_sily_ruszajacej[i].y,
-			y: wektory_sily[i].przylozenie_z*wektory_sily_ruszajacej[i].x - wektory_sily[i].przylozenie_x*wektory_sily_ruszajacej[i].z,
-			z: wektory_sily[i].przylozenie_x*wektory_sily_ruszajacej[i].y - wektory_sily[i].przylozenie_y*wektory_sily_ruszajacej[i].x,
-		}
-
-		przyspieszenia_katowe_z_wektorow[i] = Wektor{
-			x: momenty_z_wektorow[i].x / I,
-			y: momenty_z_wektorow[i].y / I,
-			z: momenty_z_wektorow[i].z / I,
-		}
-
-		wypadkowa_przyspieszen = Wektor{
-			x: wypadkowa_przyspieszen.x + przyspieszenia_z_wektorow[i].x,
-			y: wypadkowa_przyspieszen.y + przyspieszenia_z_wektorow[i].y,
-			z: wypadkowa_przyspieszen.z + przyspieszenia_z_wektorow[i].z,
-		}
-
-		wypadkowa_przyspieszen_katowych = Wektor{
-			x: wypadkowa_przyspieszen_katowych.x + przyspieszenia_katowe_z_wektorow[i].x,
-			y: wypadkowa_przyspieszen_katowych.y + przyspieszenia_katowe_z_wektorow[i].y,
-			z: wypadkowa_przyspieszen_katowych.z + przyspieszenia_katowe_z_wektorow[i].z,
-		}
-		*/
 	}
 
 	var predkosci_pilki = Wektor{
