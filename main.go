@@ -3,17 +3,16 @@ package main
 // PAMIĘTAĆ ZAMIENIAĆ WSPOLRZEDNE X Z Y NA KONIEC PROJEKTU!!!
 // PROBLEMY
 // 1 OBROTY PIŁKI
-// 2 JAK JAKIŚ WEKTOR JEST 0 TO NIE DZIAŁA CZEMU???
+
 import (
 	"fmt"
 	"github.com/g3n/engine/math32"
 	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/ungerik/go3d/float64/quaternion"
 	"math"
 	"math/rand"
 	"time"
 )
-
-// 50px -> 1m
 
 type Kula struct {
 	promien float64
@@ -46,6 +45,10 @@ type Wektor struct {
 	z float64
 }
 
+func (w Wektor) String() string {
+	return fmt.Sprintf("[%v, %v, %v]", w.x, w.y, w.z)
+}
+
 func main() {
 
 	rand.NewSource(time.Now().UnixNano())
@@ -59,14 +62,14 @@ func main() {
 	//100 px to 1 metr przedział
 
 	pilka := Kula{
-		promien: 0.12, // metry
-		posX:    0,    // pixele float64(rand.Intn(10))
-		posY:    0,    // pixele float64(rand.Intn(10))
-		posZ:    0,    // pixele
-		rotX:    0,    // radiany
-		rotY:    0,    // radiany
-		rotZ:    0,    // radiany
-		masa:    0.5,  // kilogramy
+		promien: 12,  // pixele
+		posX:    0,   // pixele float64(rand.Intn(10))
+		posY:    0,   // pixele float64(rand.Intn(10))
+		posZ:    0,   // pixele
+		rotX:    0,   // radiany
+		rotY:    0,   // radiany
+		rotZ:    0,   // radiany
+		masa:    0.5, // kilogramy
 	}
 
 	var punkty_przylozenia_wektorow [3]Punkt_przylozenia
@@ -89,23 +92,27 @@ func main() {
 
 	var I = 2.0 / 5.0 * pilka.masa * pilka.promien * pilka.promien
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 1; i++ {
 
 		punkty_przylozenia_wektorow[i] = Punkt_przylozenia{ // wyznaczane przez gracza
-			kat_fi:   math.Pi,
-			kat_teta: -math.Pi/2 + math.Pi/10, // radiany
+			kat_fi:   3 * math.Pi / 2,
+			kat_teta: -math.Pi/2 + 0.2, // radiany
 		}
 
 		wektory_sily[i] = Wektor_sily{
-			dlugosc_x:     0, // wyznacza gracz
-			dlugosc_y:     0, // wyznacza gracz
-			dlugosc_z:     0, // wyznacza gracz
+			dlugosc_x:     500, // wyznacza gracz
+			dlugosc_y:     0,   // wyznacza gracz
+			dlugosc_z:     0,   // wyznacza gracz
 			przylozenie_x: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Sin(punkty_przylozenia_wektorow[i].kat_fi),
 			przylozenie_y: pilka.promien * math.Sin(punkty_przylozenia_wektorow[i].kat_teta),
 			przylozenie_z: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Cos(punkty_przylozenia_wektorow[i].kat_fi),
 		}
 
-		sila_ruszajaca[i] = wektory_sily[i].dlugosc_x*wektory_sily[i].przylozenie_x/pilka.promien + wektory_sily[i].dlugosc_y*wektory_sily[i].przylozenie_y/pilka.promien + wektory_sily[i].dlugosc_z*wektory_sily[i].przylozenie_z/pilka.promien
+		/*fx := wektory_sily[i].dlugosc_x * wektory_sily[i].przylozenie_x / pilka.promien
+		fy := wektory_sily[i].dlugosc_y * wektory_sily[i].przylozenie_y / pilka.promien
+		fz := wektory_sily[i].dlugosc_z * wektory_sily[i].przylozenie_z / pilka.promien
+		sila_ruszajaca[i] = fx + fy + fz
+
 
 		wektory_sily_ruszajacej[i] = Wektor{
 			x: sila_ruszajaca[i] * wektory_sily[i].przylozenie_x / pilka.promien,
@@ -142,6 +149,7 @@ func main() {
 			y: wypadkowa_przyspieszen_katowych.y + przyspieszenia_katowe_z_wektorow[i].y,
 			z: wypadkowa_przyspieszen_katowych.z + przyspieszenia_katowe_z_wektorow[i].z,
 		}
+		*/
 	}
 
 	var predkosci_pilki = Wektor{
@@ -296,7 +304,7 @@ func main() {
 		if faza_gry == 1 {
 
 			if licz_wartosci == true {
-				for i := 0; i < 3; i++ {
+				for i := 0; i < 1; i++ {
 
 					sila_ruszajaca[i] = wektory_sily[i].dlugosc_x*wektory_sily[i].przylozenie_x/pilka.promien + wektory_sily[i].dlugosc_y*wektory_sily[i].przylozenie_y/pilka.promien + wektory_sily[i].dlugosc_z*wektory_sily[i].przylozenie_z/pilka.promien
 
@@ -305,6 +313,8 @@ func main() {
 						y: sila_ruszajaca[i] * wektory_sily[i].przylozenie_y / pilka.promien,
 						z: sila_ruszajaca[i] * wektory_sily[i].przylozenie_z / pilka.promien,
 					}
+					println("wektor siły ruszjacej")
+					println(wektory_sily_ruszajacej[i].String())
 
 					przyspieszenia_z_wektorow[i] = Wektor{
 						x: wektory_sily_ruszajacej[i].x / pilka.masa,
@@ -313,16 +323,20 @@ func main() {
 					}
 
 					momenty_z_wektorow[i] = Wektor{
-						x: wektory_sily[i].przylozenie_y*wektory_sily_ruszajacej[i].z - wektory_sily[i].przylozenie_z*wektory_sily_ruszajacej[i].y,
-						y: wektory_sily[i].przylozenie_z*wektory_sily_ruszajacej[i].x - wektory_sily[i].przylozenie_x*wektory_sily_ruszajacej[i].z,
-						z: wektory_sily[i].przylozenie_x*wektory_sily_ruszajacej[i].y - wektory_sily[i].przylozenie_y*wektory_sily_ruszajacej[i].x,
+						x: wektory_sily[i].przylozenie_y*wektory_sily[i].dlugosc_z - wektory_sily[i].przylozenie_z*wektory_sily[i].dlugosc_y,
+						y: wektory_sily[i].przylozenie_z*wektory_sily[i].dlugosc_x - wektory_sily[i].przylozenie_x*wektory_sily[i].dlugosc_z,
+						z: wektory_sily[i].przylozenie_x*wektory_sily[i].dlugosc_y - wektory_sily[i].przylozenie_y*wektory_sily[i].dlugosc_x,
 					}
+					println("momenty wektorow")
+					println(momenty_z_wektorow[i].String())
 
 					przyspieszenia_katowe_z_wektorow[i] = Wektor{
 						x: momenty_z_wektorow[i].x / I,
 						y: momenty_z_wektorow[i].y / I,
 						z: momenty_z_wektorow[i].z / I,
 					}
+					println("przyspieszenia_katowe_z_wektorow")
+					println(przyspieszenia_katowe_z_wektorow[i].String())
 
 					wypadkowa_przyspieszen = Wektor{
 						x: wypadkowa_przyspieszen.x + przyspieszenia_z_wektorow[i].x,
@@ -335,6 +349,8 @@ func main() {
 						y: wypadkowa_przyspieszen_katowych.y + przyspieszenia_katowe_z_wektorow[i].y,
 						z: wypadkowa_przyspieszen_katowych.z + przyspieszenia_katowe_z_wektorow[i].z,
 					}
+					println("wypadkowa_przyspieszen_katowych")
+					println(wypadkowa_przyspieszen_katowych.String())
 				}
 
 				predkosci_pilki = Wektor{
@@ -348,6 +364,9 @@ func main() {
 					y: wypadkowa_przyspieszen_katowych.y * czas_dzialania_sily_na_pilke,
 					z: wypadkowa_przyspieszen_katowych.z * czas_dzialania_sily_na_pilke,
 				}
+				println("predkosci_katowe_pilki")
+				println(predkosci_katowe_pilki.String())
+
 				licz_wartosci = false
 			}
 			pilka.posX = pilka.posX + predkosci_pilki.x*krok_czasowy
@@ -363,11 +382,21 @@ func main() {
 			pilka.rotY = pilnowanie_zakresu_kata(pilka.rotY)
 			pilka.rotZ = pilnowanie_zakresu_kata(pilka.rotZ)
 
+			qX := quaternion.FromXAxisAngle(pilka.rotX)
+			qY := quaternion.FromYAxisAngle(pilka.rotY)
+			qZ := quaternion.FromZAxisAngle(pilka.rotZ)
+
+			kwaternion_glowny := quaternion.Mul3(&qX, &qY, &qZ)
+
+			os, kat := kwaternion_glowny.AxisAngle()
+
+			println(os.String(), " ", kat)
+
+			rotationAxis = rl.NewVector3(float32(os[0]), float32(os[1]), float32(os[2]))
+			rotationAngle = float32(kat * 180 / math.Pi)
 		}
 		// Draw
 		rl.BeginDrawing()
-
-		println(pilka.posX, " ", pilka.posY, " ", pilka.posZ, " ", predkosci_pilki.z)
 
 		rl.ClearBackground(rl.RayWhite)
 
