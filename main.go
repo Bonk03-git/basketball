@@ -58,18 +58,32 @@ func main() {
 	const czas_dzialania_sily_na_pilke = 0.5
 	const krok_czasowy = 0.001
 	const g = -981
+	const stala_wzrostu_malenia = 25
+	const grubosc_tablicy = 0.1   // metry
+	const szerokosc_tablicy = 1.8 // metry
+	const wysokosc_tablicy = 1.05 //metry
+	const x_tablicy = 5
+	const y_tablicy = 3
+	const z_tablicy = 0
 
 	//100 px to 1 metr przedział
 
+	start_pos_x := 0
+	start_pos_y := 1
+	start_pos_z := 0
+	start_rot_x := 0
+	start_rot_y := 0
+	start_rot_z := 0
+
 	pilka := Kula{
-		promien: 12,  // pixele
-		posX:    0,   // pixele float64(rand.Intn(10))
-		posY:    0,   // pixele float64(rand.Intn(10))
-		posZ:    0,   // pixele
-		rotX:    0,   // radiany
-		rotY:    0,   // radiany
-		rotZ:    0,   // radiany
-		masa:    0.5, // kilogramy
+		promien: 12,                   // pixele
+		posX:    float64(start_pos_x), // pixele float64(rand.Intn(10))
+		posY:    float64(start_pos_y), // pixele float64(rand.Intn(10))
+		posZ:    float64(start_pos_z), // pixele
+		rotX:    float64(start_rot_x), // radiany
+		rotY:    float64(start_rot_y), // radiany
+		rotZ:    float64(start_rot_z), // radiany
+		masa:    0.5,                  // kilogramy
 	}
 
 	var punkty_przylozenia_wektorow [3]Punkt_przylozenia
@@ -96,7 +110,7 @@ func main() {
 
 		punkty_przylozenia_wektorow[i] = Punkt_przylozenia{ // wyznaczane przez gracza
 			kat_fi:   3 * math.Pi / 2,
-			kat_teta: -math.Pi/2 + 0.2, // radiany
+			kat_teta: -math.Pi / 4, // radiany
 		}
 
 		wektory_sily[i] = Wektor_sily{
@@ -136,7 +150,7 @@ func main() {
 	rl.DisableCursor()
 
 	// Create a sphere mesh and model
-	sphereMesh := rl.GenMeshSphere(0.12, 32, 32)
+	sphereMesh := rl.GenMeshSphere(float32(pilka.promien/100), 32, 32)
 	sphereModel := rl.LoadModelFromMesh(sphereMesh)
 
 	// Load the basketball texture
@@ -148,7 +162,7 @@ func main() {
 	// Use SetMaterialTexture to set the texture
 	rl.SetMaterialTexture(&materials[0], rl.MapDiffuse, texture)
 
-	basketMesh := rl.GenMeshCube(0.1, 1.05, 1.8)
+	basketMesh := rl.GenMeshCube(grubosc_tablicy, wysokosc_tablicy, szerokosc_tablicy)
 	basketModel := rl.LoadModelFromMesh(basketMesh)
 
 	texture_2 := rl.LoadTexture("czarny.png")
@@ -157,7 +171,7 @@ func main() {
 	// Use SetMaterialTexture to set the texture
 	rl.SetMaterialTexture(&materials[0], rl.MapDiffuse, texture_2)
 
-	basketPosition := rl.NewVector3(5, 3, 0)
+	basketPosition := rl.NewVector3(x_tablicy, y_tablicy, z_tablicy)
 
 	hoopMesh := rl.GenMeshTorus(0.1, 0.5, 16, 32)
 	hoopModel := rl.LoadModelFromMesh(hoopMesh)
@@ -179,6 +193,7 @@ func main() {
 	licznik := 0
 	licz_wartosci := true
 	faza_gry := 0
+	odbicie := 0
 
 	rl.SetTargetFPS(60)
 
@@ -193,7 +208,13 @@ func main() {
 		if faza_gry == 0 {
 
 			if licznik == 5 {
+				for i := 0; i < 1; i++ {
+					wektory_sily[i].przylozenie_x = pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Sin(punkty_przylozenia_wektorow[i].kat_fi)
+					wektory_sily[i].przylozenie_y = pilka.promien * math.Sin(punkty_przylozenia_wektorow[i].kat_teta)
+					wektory_sily[i].przylozenie_z = pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Cos(punkty_przylozenia_wektorow[i].kat_fi)
+				}
 				faza_gry += 1
+
 			}
 
 			if licznik == 4 {
@@ -223,10 +244,10 @@ func main() {
 			if licznik == 2 {
 				rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku z= %f", wektory_sily[0].dlugosc_z), 10, 10, 20, rl.DarkGray)
 				if rl.IsKeyPressed(rl.KeyU) {
-					wektory_sily[0].dlugosc_z += 5
+					wektory_sily[0].dlugosc_z += stala_wzrostu_malenia
 				}
 				if rl.IsKeyPressed(rl.KeyY) {
-					wektory_sily[0].dlugosc_z -= 5
+					wektory_sily[0].dlugosc_z -= stala_wzrostu_malenia
 				}
 				if rl.IsKeyPressed(rl.KeyEnter) {
 					licznik += 1
@@ -235,10 +256,10 @@ func main() {
 			if licznik == 1 {
 				rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku y= %f", wektory_sily[0].dlugosc_y), 10, 10, 20, rl.DarkGray)
 				if rl.IsKeyPressed(rl.KeyU) {
-					wektory_sily[0].dlugosc_y += 5
+					wektory_sily[0].dlugosc_y += stala_wzrostu_malenia
 				}
 				if rl.IsKeyPressed(rl.KeyY) {
-					wektory_sily[0].dlugosc_y -= 5
+					wektory_sily[0].dlugosc_y -= stala_wzrostu_malenia
 				}
 				if rl.IsKeyPressed(rl.KeyEnter) {
 					licznik += 1
@@ -248,10 +269,10 @@ func main() {
 			if licznik == 0 {
 				rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku x= %f", wektory_sily[0].dlugosc_x), 10, 10, 20, rl.DarkGray)
 				if rl.IsKeyPressed(rl.KeyU) {
-					wektory_sily[0].dlugosc_x += 5
+					wektory_sily[0].dlugosc_x += stala_wzrostu_malenia
 				}
 				if rl.IsKeyPressed(rl.KeyY) {
-					wektory_sily[0].dlugosc_x -= 5
+					wektory_sily[0].dlugosc_x -= stala_wzrostu_malenia
 				}
 				if rl.IsKeyPressed(rl.KeyEnter) {
 					licznik += 1
@@ -262,7 +283,7 @@ func main() {
 		if faza_gry == 1 {
 
 			if licz_wartosci == true {
-				for i := 0; i < 1; i++ {
+				for i := 0; i < 1; i++ { // todo: zmiana 1 na 3
 
 					sila_ruszajaca[i] = wektory_sily[i].dlugosc_x*wektory_sily[i].przylozenie_x/pilka.promien + wektory_sily[i].dlugosc_y*wektory_sily[i].przylozenie_y/pilka.promien + wektory_sily[i].dlugosc_z*wektory_sily[i].przylozenie_z/pilka.promien
 
@@ -279,6 +300,8 @@ func main() {
 						y: wektory_sily_ruszajacej[i].y / pilka.masa,
 						z: wektory_sily_ruszajacej[i].z / pilka.masa,
 					}
+					println("przyspieszenia")
+					println(przyspieszenia_z_wektorow[i].String())
 
 					momenty_z_wektorow[i] = Wektor{
 						x: wektory_sily[i].przylozenie_y*wektory_sily[i].dlugosc_z - wektory_sily[i].przylozenie_z*wektory_sily[i].dlugosc_y,
@@ -293,6 +316,7 @@ func main() {
 						y: momenty_z_wektorow[i].y / I,
 						z: momenty_z_wektorow[i].z / I,
 					}
+
 					println("przyspieszenia_katowe_z_wektorow")
 					println(przyspieszenia_katowe_z_wektorow[i].String())
 
@@ -316,7 +340,8 @@ func main() {
 					y: wypadkowa_przyspieszen.y * czas_dzialania_sily_na_pilke,
 					z: wypadkowa_przyspieszen.z * czas_dzialania_sily_na_pilke,
 				}
-
+				println("predkosci_pilki")
+				println(predkosci_pilki.String())
 				predkosci_katowe_pilki = Wektor{
 					x: wypadkowa_przyspieszen_katowych.x * czas_dzialania_sily_na_pilke,
 					y: wypadkowa_przyspieszen_katowych.y * czas_dzialania_sily_na_pilke,
@@ -327,6 +352,85 @@ func main() {
 
 				licz_wartosci = false
 			}
+
+			//odbicie od ziemii
+			if pilka.posY-pilka.promien/100 < 0 {
+				predkosci_pilki.y = -predkosci_pilki.y * 0.75
+				pilka.posY = pilka.promien / 100
+				odbicie += 1
+			}
+
+			//odbicie od tablicy
+			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posX+pilka.promien/100 > x_tablicy-grubosc_tablicy/2 && pilka.posX+pilka.promien/100 < x_tablicy {
+				predkosci_pilki.x = -predkosci_pilki.x * 0.6
+				pilka.posX = x_tablicy - grubosc_tablicy/2 - pilka.promien/100
+			}
+
+			// powrot do rzutu gdy pilka sie 3 razy odbije lub za wysoko poleci
+			if odbicie == 3 || pilka.posY > 30 || pilka.posX > 10 {
+				pilka.posX = float64(start_pos_x)
+				pilka.posY = float64(start_pos_y)
+				pilka.posZ = float64(start_pos_z)
+				pilka.rotX = float64(start_rot_x)
+				pilka.rotY = float64(start_rot_y)
+				pilka.rotZ = float64(start_rot_z)
+				licznik = 0
+				licz_wartosci = true
+				faza_gry = 0
+				odbicie = 0
+				for i := 0; i < 1; i++ { // todo 1 na 3
+					sila_ruszajaca[i] = 0
+
+					wektory_sily_ruszajacej[i] = Wektor{
+						x: 0,
+						y: 0,
+						z: 0,
+					}
+
+					przyspieszenia_z_wektorow[i] = Wektor{
+						x: 0,
+						y: 0,
+						z: 0,
+					}
+
+					momenty_z_wektorow[i] = Wektor{
+						x: 0,
+						y: 0,
+						z: 0,
+					}
+
+					przyspieszenia_katowe_z_wektorow[i] = Wektor{
+						x: 0,
+						y: 0,
+						z: 0,
+					}
+				}
+				wypadkowa_przyspieszen = Wektor{
+					x: 0,
+					y: 0,
+					z: 0,
+				}
+
+				wypadkowa_przyspieszen_katowych = Wektor{
+					x: 0,
+					y: 0,
+					z: 0,
+				}
+
+				predkosci_pilki = Wektor{
+					x: 0,
+					y: 0,
+					z: 0,
+				}
+
+				predkosci_katowe_pilki = Wektor{
+					x: 0,
+					y: 0,
+					z: 0,
+				}
+
+			}
+
 			pilka.posX = pilka.posX + predkosci_pilki.x*krok_czasowy
 			pilka.posY = pilka.posY + predkosci_pilki.y*krok_czasowy + g*krok_czasowy*krok_czasowy/2
 			predkosci_pilki.y = predkosci_pilki.y + g*krok_czasowy
@@ -348,7 +452,7 @@ func main() {
 
 			os, kat := kwaternion_glowny.AxisAngle()
 
-			println(os.String(), " ", kat)
+			println(os.String(), " ", kat, " ", pilka.posY)
 
 			rotationAxis = rl.NewVector3(float32(os[0]), float32(os[1]), float32(os[2]))
 			rotationAngle = float32(kat * 180 / math.Pi)
