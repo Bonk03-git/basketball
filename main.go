@@ -360,14 +360,47 @@ func main() {
 				odbicie += 1
 			}
 
-			//odbicie od tablicy
+			//odbicia od tablicy
+			//przod
 			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posX+pilka.promien/100 > x_tablicy-grubosc_tablicy/2 && pilka.posX+pilka.promien/100 < x_tablicy {
 				predkosci_pilki.x = -predkosci_pilki.x * 0.6
 				pilka.posX = x_tablicy - grubosc_tablicy/2 - pilka.promien/100
 			}
+			//tyl
+			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posX+pilka.promien/100 < x_tablicy+grubosc_tablicy/2 && pilka.posX+pilka.promien/100 > x_tablicy {
+				predkosci_pilki.x = -predkosci_pilki.z * 0.6
+				pilka.posX = x_tablicy + grubosc_tablicy/2 + pilka.promien/100
+			}
+			//gora
+			if pilka.posX < x_tablicy+grubosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX > x_tablicy-grubosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posY-pilka.promien/100 < y_tablicy+wysokosc_tablicy/2 && pilka.posY-pilka.promien/100 > y_tablicy {
+				predkosci_pilki.y = -predkosci_pilki.y * 0.6
+				pilka.posY = y_tablicy + wysokosc_tablicy/2 + pilka.promien/100
+			}
+			//dol
+			if pilka.posX < x_tablicy+grubosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX > x_tablicy-grubosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posY+pilka.promien/100 > y_tablicy-wysokosc_tablicy/2 && pilka.posY+pilka.promien/100 < y_tablicy {
+				predkosci_pilki.y = -predkosci_pilki.y * 0.6
+				pilka.posY = y_tablicy - wysokosc_tablicy/2 - pilka.promien/100
+			}
+			//prawo
+			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posX < x_tablicy-grubosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posX > x_tablicy+grubosc_tablicy/2 && pilka.posZ+pilka.promien/100 < z_tablicy+szerokosc_tablicy/2 && pilka.posZ-pilka.promien/100 > z_tablicy {
+				predkosci_pilki.z = -predkosci_pilki.z * 0.6
+				pilka.posZ = z_tablicy + szerokosc_tablicy/2 + pilka.promien/100
+			}
+			//lewo
+			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posX < x_tablicy-grubosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posX > x_tablicy+grubosc_tablicy/2 && pilka.posZ+pilka.promien/100 < z_tablicy && pilka.posZ-pilka.promien/100 > z_tablicy-szerokosc_tablicy/2 {
+				predkosci_pilki.z = -predkosci_pilki.z * 0.6
+				pilka.posZ = z_tablicy - szerokosc_tablicy/2 - pilka.promien/100
+			}
 
-			// powrot do rzutu gdy pilka sie 3 razy odbije lub za wysoko poleci
-			if odbicie == 3 || pilka.posY > 30 || pilka.posX > 10 {
+			//krawedz przod-prawo
+
+			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posX < x_tablicy-grubosc_tablicy/2 && pilka.posZ > z_tablicy+szerokosc_tablicy/2 && ((pilka.posX-x_tablicy+grubosc_tablicy)*(pilka.posX-x_tablicy+grubosc_tablicy/2)+(pilka.posZ-z_tablicy-szerokosc_tablicy/2)*(pilka.posZ-z_tablicy-szerokosc_tablicy/2)) < pilka.promien*pilka.promien/10000 {
+				predkosci_pilki.z = 0
+				predkosci_pilki.x = 0
+			}
+
+			// powrot do rzutu gdy pilka sie 3 razy odbije lub za wysoko poleci albo za dalko
+			if odbicie == 3 || pilka.posY > 30 || pilka.posX > 10 || pilka.posX < -10 {
 				pilka.posX = float64(start_pos_x)
 				pilka.posY = float64(start_pos_y)
 				pilka.posZ = float64(start_pos_z)
