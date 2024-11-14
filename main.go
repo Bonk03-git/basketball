@@ -1,9 +1,5 @@
 package main
 
-// PAMIĘTAĆ ZAMIENIAĆ WSPOLRZEDNE X Z Y NA KONIEC PROJEKTU!!!
-// PROBLEMY
-// 1 OBROTY PIŁKI
-
 import (
 	"fmt"
 	"github.com/g3n/engine/math32"
@@ -56,10 +52,9 @@ func main() {
 	const szerokosc int = 1600
 	const wysokosc int = 900
 	const czas_dzialania_sily_na_pilke = 0.1
-	const fps = 60
+	const fps = 100
 	const krok_czasowy = 1.0 / fps
 	const g float64 = -9.81
-	const tarcie_podloga = 0.5
 	const wspolczynnik_odbicia = 0.7
 	const stala_wzrostu_malenia = 1
 	const grubosc_tablicy = 0.01  // metry
@@ -68,12 +63,13 @@ func main() {
 	const x_tablicy = 5
 	const y_tablicy = 3
 	const z_tablicy = 0
+	const wspolczynnik_momentu = 2.0 / 3.0
 
 	//100 px to 1 metr przedział
 
 	start_pos_x := 0
 	start_pos_y := 1
-	start_pos_z := 0
+	start_pos_z := 5
 	start_rot_x := 0
 	start_rot_y := 0
 	start_rot_z := 0
@@ -106,20 +102,19 @@ func main() {
 		y: 0,
 		z: 0,
 	}
-
-	var I = 2.0 * pilka.masa * pilka.promien * pilka.promien / 3.0
+	var I = wspolczynnik_momentu * pilka.masa * pilka.promien * pilka.promien
 
 	for i := 0; i < 1; i++ { //todo 1 na 3
 
 		punkty_przylozenia_wektorow[i] = Punkt_przylozenia{ // wyznaczane przez gracza
 			kat_fi:   3 * math.Pi / 2, //radiany
-			kat_teta: -math.Pi / 4,    // radiany
+			kat_teta: 0,               // radiany
 		}
 
 		wektory_sily[i] = Wektor_sily{
-			dlugosc_x:     30,                                                                                                                  // wyznacza gracz Niutony
-			dlugosc_y:     30,                                                                                                                  // wyznacza gracz
-			dlugosc_z:     0,                                                                                                                   // wyznacza gracz
+			dlugosc_x:     25,                                                                                                                  // wyznacza gracz Niutony
+			dlugosc_y:     40,                                                                                                                  // wyznacza gracz
+			dlugosc_z:     -25,                                                                                                                 // wyznacza gracz
 			przylozenie_x: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Sin(punkty_przylozenia_wektorow[i].kat_fi), //metry
 			przylozenie_y: pilka.promien * math.Sin(punkty_przylozenia_wektorow[i].kat_teta),
 			przylozenie_z: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Cos(punkty_przylozenia_wektorow[i].kat_fi),
@@ -373,66 +368,89 @@ func main() {
 			//odbicie od ziemii
 			if pilka.posY-pilka.promien < 0 {
 				pilka.posY = pilka.promien
-				println(predkosci_pilki.z, ' ', predkosci_pilki.x, ' ', predkosci_pilki.y, ' ', predkosci_katowe_pilki.z, ' ', predkosci_katowe_pilki.x, ' ', predkosci_katowe_pilki.y)
-				predkosc_wzgledna_z := predkosci_pilki.z - pilka.promien*predkosci_katowe_pilki.x
-				predkosc_wzgledna_x := predkosci_pilki.x + pilka.promien*predkosci_katowe_pilki.z
-				predkosc_y_przed_odbiciem := predkosci_pilki.y
-				predkosci_pilki.y = -predkosc_y_przed_odbiciem * wspolczynnik_odbicia
-				impuls_y := pilka.masa * (predkosci_pilki.y - predkosc_y_przed_odbiciem)
-				impuls_x := -tarcie_podloga * impuls_y * Sign(predkosc_wzgledna_x)
-				impuls_z := -tarcie_podloga * impuls_y * Sign(predkosc_wzgledna_z)
-				if math.Abs(impuls_z) > tarcie_podloga*impuls_y {
-					impuls_z = tarcie_podloga * impuls_y * Sign(impuls_z)
-				}
-				if math.Abs(impuls_x) > tarcie_podloga*impuls_y {
-					impuls_x = tarcie_podloga * impuls_y * Sign(impuls_x)
-				}
-				predkosci_pilki.z = predkosci_pilki.z + impuls_z/pilka.masa
-				predkosci_pilki.x = predkosci_pilki.x + impuls_x/pilka.masa
-				moment_sily_z := -pilka.promien * impuls_x
-				moment_sily_x := pilka.promien * impuls_z
-				//jako że delta t mała to zmiana momentu pedu w przyblizeniu daje moment sily
-				predkosci_katowe_pilki.z = predkosci_katowe_pilki.z + moment_sily_z/I
-				predkosci_katowe_pilki.x = predkosci_katowe_pilki.x + moment_sily_x/I
-				println(predkosci_pilki.z, ' ', predkosci_pilki.x, ' ', predkosci_pilki.y, ' ', predkosci_katowe_pilki.z, ' ', predkosci_katowe_pilki.x, ' ', predkosci_katowe_pilki.y)
+				bufor_x := predkosci_pilki.x
+				bufor_z := predkosci_pilki.z
+				predkosci_pilki.y = -predkosci_pilki.y * wspolczynnik_odbicia
+				predkosci_pilki.x = wspolczynnik_odbicia * (bufor_x - wspolczynnik_momentu*pilka.promien*predkosci_katowe_pilki.z)
+				predkosci_pilki.z = wspolczynnik_odbicia * (bufor_z + wspolczynnik_momentu*pilka.promien*predkosci_katowe_pilki.x)
+				predkosci_katowe_pilki.x = wspolczynnik_odbicia * (predkosci_katowe_pilki.x + wspolczynnik_momentu*bufor_z/pilka.promien)
+				predkosci_katowe_pilki.z = wspolczynnik_odbicia * (predkosci_katowe_pilki.z - wspolczynnik_momentu*bufor_x/pilka.promien)
+
 				odbicie += 1
+
 			}
 
-			//odbicia od tablicy
+			//odbicia od tablicy todo sprawdzac wartosc pozycji o klatke wczesniej!
 			//powierzchnia
 
-			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX+pilka.promien > x_tablicy-grubosc_tablicy/2 && pilka.posX+pilka.promien < x_tablicy+1 {
+			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX+pilka.promien > x_tablicy-grubosc_tablicy/2 && pilka.posX+pilka.promien < x_tablicy+grubosc_tablicy/2 {
 				pilka.posX = x_tablicy - grubosc_tablicy/2 - pilka.promien
 				bufor_y := predkosci_pilki.y
 				bufor_z := predkosci_pilki.z
 				predkosci_pilki.x = -predkosci_pilki.x * wspolczynnik_odbicia
-				predkosci_pilki.y = wspolczynnik_odbicia * (bufor_y - 2*pilka.promien*predkosci_katowe_pilki.z)
-				predkosci_pilki.z = wspolczynnik_odbicia * (bufor_z + 2*pilka.promien*predkosci_katowe_pilki.y)
-				predkosci_katowe_pilki.y = wspolczynnik_odbicia * (predkosci_katowe_pilki.y + 2/3*bufor_z)
-				predkosci_katowe_pilki.z = wspolczynnik_odbicia * (predkosci_katowe_pilki.z - 2/3*bufor_y)
+				predkosci_pilki.y = wspolczynnik_odbicia * (bufor_y - wspolczynnik_momentu*pilka.promien*predkosci_katowe_pilki.z)
+				predkosci_pilki.z = wspolczynnik_odbicia * (bufor_z + wspolczynnik_momentu*pilka.promien*predkosci_katowe_pilki.y)
+				predkosci_katowe_pilki.y = wspolczynnik_odbicia * (predkosci_katowe_pilki.y + wspolczynnik_momentu*bufor_z/pilka.promien)
+				predkosci_katowe_pilki.z = wspolczynnik_odbicia * (predkosci_katowe_pilki.z - wspolczynnik_momentu*bufor_y/pilka.promien)
 
 				println("Uderzona tablica")
 			}
 
 			//krawedz prawa
 
-			/*if pilka.posY <= y_tablicy+wysokosc_tablicy/2 && pilka.posY >= y_tablicy-wysokosc_tablicy/2 && pilka.posX <= x_tablicy-grubosc_tablicy/2 && pilka.posZ >= z_tablicy+szerokosc_tablicy/2 && ((pilka.posX-x_tablicy+grubosc_tablicy)*(pilka.posX-x_tablicy+grubosc_tablicy/2)+(pilka.posZ-z_tablicy-szerokosc_tablicy/2)*(pilka.posZ-z_tablicy-szerokosc_tablicy/2)) < pilka.promien*pilka.promien/10000 {
-				pilka.posX -= 0.01
-				pilka.posZ += 0.01
-				pocz_x := predkosci_pilki.x
-				pocz_z := predkosci_pilki.z
-				//wektor jednostkowy ruchu
-				predkosci_pilki.x = predkosci_pilki.x / math.Sqrt(predkosci_pilki.z*predkosci_pilki.z+predkosci_pilki.x*predkosci_pilki.x)
-				predkosci_pilki.z = predkosci_pilki.z / math.Sqrt(predkosci_pilki.z*predkosci_pilki.z+predkosci_pilki.x*predkosci_pilki.x)
+			if pilka.posY <= y_tablicy+wysokosc_tablicy/2 && pilka.posY >= y_tablicy-wysokosc_tablicy/2 && pilka.posX >= x_tablicy-grubosc_tablicy/2-pilka.promien && pilka.posX <= x_tablicy+grubosc_tablicy/2+pilka.promien && pilka.posZ >= z_tablicy+szerokosc_tablicy/2+pilka.promien && ((pilka.posX-x_tablicy+grubosc_tablicy/2)*(pilka.posX-x_tablicy+grubosc_tablicy/2)+(pilka.posZ-z_tablicy-szerokosc_tablicy/2)*(pilka.posZ-z_tablicy-szerokosc_tablicy/2)) < pilka.promien*pilka.promien {
+				println("krawedz")
+				var predkosci_pocz = Wektor{
+					x: predkosci_pilki.x,
+					y: predkosci_pilki.y,
+					z: predkosci_pilki.z,
+				}
+
 				//wektor jednostkowy normalnej
-				normalna_x := x_tablicy - grubosc_tablicy/2 - pilka.posX
-				normalna_z := pilka.posZ - z_tablicy - szerokosc_tablicy/2
-				normalna_x = normalna_x / math.Sqrt(normalna_x*normalna_x+normalna_z*normalna_z)
-				normalna_z = normalna_z / math.Sqrt(normalna_x*normalna_x+normalna_z*normalna_z)
-				//nowy wektor ruchu
-				predkosci_pilki.x = pocz_x - 2*(pocz_x*normalna_x+pocz_z*normalna_z)*normalna_x
-				predkosci_pilki.z = pocz_z - 2*(pocz_x*normalna_x+pocz_z*normalna_z)*normalna_z
-			}*/
+
+				var normalna = Wektor{
+					x: pilka.posX - x_tablicy + grubosc_tablicy/2,
+					y: 0.0,
+					z: pilka.posZ - z_tablicy - szerokosc_tablicy/2,
+				}
+				normalna.x = normalna.x / math.Sqrt(normalna.x*normalna.x+normalna.z*normalna.z)
+				normalna.z = normalna.z / math.Sqrt(normalna.x*normalna.x+normalna.z*normalna.z)
+
+				//wektor od środka piłki do punktu styku z krawędzią
+				var r_przez_I = Wektor{
+					x: -pilka.promien * normalna.x / I,
+					y: -pilka.promien * normalna.y / I,
+					z: -pilka.promien * normalna.z / I,
+				}
+
+				var delta_liniowa = Wektor{
+					x: -(1 + wspolczynnik_odbicia) * (predkosci_pocz.x*normalna.x + predkosci_pocz.y*normalna.y + predkosci_pocz.z*normalna.z) * normalna.x,
+					y: -(1 + wspolczynnik_odbicia) * (predkosci_pocz.x*normalna.x + predkosci_pocz.y*normalna.y + predkosci_pocz.z*normalna.z) * normalna.y,
+					z: -(1 + wspolczynnik_odbicia) * (predkosci_pocz.x*normalna.x + predkosci_pocz.y*normalna.y + predkosci_pocz.z*normalna.z) * normalna.z,
+				}
+
+				var delta_katowa = iloczyn_wektorowy(r_przez_I, delta_liniowa)
+
+				//predkosci liniowe po odbiciu
+				predkosci_pilki.x = predkosci_pocz.x + delta_liniowa.x
+				predkosci_pilki.y = predkosci_pocz.y + delta_liniowa.y
+				predkosci_pilki.z = predkosci_pocz.z + delta_liniowa.z
+
+				//predkosci katowe po odbiciu
+				predkosci_katowe_pilki.x = predkosci_katowe_pilki.x + delta_katowa.x
+				predkosci_katowe_pilki.y = predkosci_katowe_pilki.y + delta_katowa.y
+				predkosci_katowe_pilki.z = predkosci_katowe_pilki.z + delta_katowa.z
+				//zapewnienie wyjścia piłki z obszaru odbicia
+
+				pilka.posX = pilka.posX + predkosci_pilki.x*krok_czasowy
+				pilka.posY = pilka.posY + predkosci_pilki.y*krok_czasowy + g*krok_czasowy*krok_czasowy/2
+				predkosci_pilki.y = predkosci_pilki.y + g*krok_czasowy
+				pilka.posZ = pilka.posZ + predkosci_pilki.z*krok_czasowy
+
+				pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
+				pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
+				pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
+			}
 
 			// powrot do rzutu gdy pilka sie 3 razy odbije lub za wysoko poleci albo za dalko
 			if odbicie == 5 || pilka.posY > 30 || pilka.posX > 10 || pilka.posX < -10 {
@@ -593,7 +611,7 @@ func pilnowanie_zakresu_kata(rotacja float64) float64 {
 		}
 	}
 	return rotacja
-}
+} /*
 func Sign(x float64) float64 {
 	if x > 0.001 {
 		return 1
@@ -601,4 +619,11 @@ func Sign(x float64) float64 {
 		return -1
 	}
 	return 0
+}*/
+func iloczyn_wektorowy(wektor_1 Wektor, wektor_2 Wektor) Wektor {
+	return Wektor{
+		x: wektor_1.y*wektor_2.z - wektor_1.z*wektor_2.y,
+		y: wektor_1.z*wektor_2.x - wektor_1.x - wektor_2.z,
+		z: wektor_1.x*wektor_2.y - wektor_1.y - wektor_2.x,
+	}
 }
