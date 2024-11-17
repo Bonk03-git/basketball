@@ -69,7 +69,7 @@ func main() {
 
 	start_pos_x := 0
 	start_pos_y := 1
-	start_pos_z := -5
+	start_pos_z := 0
 	start_rot_x := 0
 	start_rot_y := 0
 	start_rot_z := 0
@@ -638,7 +638,7 @@ func main() {
 					pilka.posZ > z_tablicy-szerokosc_tablicy/2 &&
 					pilka.posX > x_tablicy-grubosc_tablicy/2-pilka.promien &&
 					pilka.posX < x_tablicy+grubosc_tablicy/2+pilka.promien &&
-					pilka.posZ < z_tablicy-szerokosc_tablicy/2 &&
+					pilka.posY > y_tablicy+wysokosc_tablicy/2 &&
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					pilka.posX = pilka.posX + predkosci_pilki.x*krok_czasowy
@@ -706,6 +706,81 @@ func main() {
 					pilka.posX < x_tablicy+grubosc_tablicy/2+pilka.promien &&
 					pilka.posY < y_tablicy-wysokosc_tablicy/2 &&
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy+wysokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
+
+					pilka.posX = pilka.posX + predkosci_pilki.x*krok_czasowy
+					pilka.posY = pilka.posY + predkosci_pilki.y*krok_czasowy + g*krok_czasowy*krok_czasowy/2
+					predkosci_pilki.y = predkosci_pilki.y + g*krok_czasowy
+					pilka.posZ = pilka.posZ + predkosci_pilki.z*krok_czasowy
+
+					pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
+					pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
+					pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
+				}
+			}
+
+			// prawy gorny rog
+			if pilka.posZ > z_tablicy+szerokosc_tablicy/2 && pilka.posY > y_tablicy+wysokosc_tablicy/2 && math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
+
+				println("prawy gorny rog")
+
+				var punkt_odbicia_wzgl_pilki = Wektor{
+					x: x_tablicy - pilka.posX,
+					y: y_tablicy + wysokosc_tablicy/2 - pilka.posY,
+					z: z_tablicy + szerokosc_tablicy/2 - pilka.posZ,
+				}
+
+				dlugosc_wektora_puktu_odbicia_od_pilki := math.Sqrt(math.Pow(punkt_odbicia_wzgl_pilki.x, 2) + math.Pow(punkt_odbicia_wzgl_pilki.y, 2) + math.Pow(punkt_odbicia_wzgl_pilki.z, 2))
+
+				var predkosc_katowa_z_punktem_odbicia = iloczyn_wektorowy(predkosci_katowe_pilki, punkt_odbicia_wzgl_pilki)
+
+				var predkosc_punktu_styku_przed_odbiciem = dodaj_wektory(predkosci_pilki, predkosc_katowa_z_punktem_odbicia)
+
+				//wektor normalny
+
+				var normalna = Wektor{
+					x: punkt_odbicia_wzgl_pilki.x / dlugosc_wektora_puktu_odbicia_od_pilki,
+					y: punkt_odbicia_wzgl_pilki.y / dlugosc_wektora_puktu_odbicia_od_pilki,
+					z: punkt_odbicia_wzgl_pilki.z / dlugosc_wektora_puktu_odbicia_od_pilki,
+				}
+
+				predkosc_normalna := predkosci_pilki.x*normalna.x + predkosci_pilki.y*normalna.y + predkosci_pilki.z*normalna.z
+
+				var predkosc_styczna = Wektor{
+					x: predkosc_punktu_styku_przed_odbiciem.x - predkosc_normalna*normalna.x,
+					y: predkosc_punktu_styku_przed_odbiciem.y - predkosc_normalna*normalna.y,
+					z: predkosc_punktu_styku_przed_odbiciem.z - predkosc_normalna*normalna.z,
+				}
+
+				predkosc_normalna = -wspolczynnik_odbicia * predkosc_normalna
+
+				var predkosc_punktu_styku_po_odbiciu = Wektor{
+					x: predkosc_normalna*normalna.x + predkosc_styczna.x,
+					y: predkosc_normalna*normalna.y + predkosc_styczna.y,
+					z: predkosc_normalna*normalna.z + predkosc_styczna.z,
+				}
+
+				var impuls = Wektor{
+					x: -pilka.masa * (predkosc_punktu_styku_po_odbiciu.x - predkosc_punktu_styku_przed_odbiciem.x),
+					y: -pilka.masa * (predkosc_punktu_styku_po_odbiciu.y - predkosc_punktu_styku_przed_odbiciem.y),
+					z: -pilka.masa * (predkosc_punktu_styku_po_odbiciu.z - predkosc_punktu_styku_przed_odbiciem.z),
+				}
+				predkosci_pilki = Wektor{
+					x: predkosci_pilki.x + impuls.x/pilka.masa,
+					y: predkosci_pilki.y + impuls.y/pilka.masa,
+					z: predkosci_pilki.z + impuls.z/pilka.masa,
+				}
+				var punkt_odbicia_wzgl_pilki_z_impulsem = iloczyn_wektorowy(punkt_odbicia_wzgl_pilki, impuls)
+
+				predkosci_katowe_pilki = Wektor{
+					x: predkosci_katowe_pilki.x + punkt_odbicia_wzgl_pilki_z_impulsem.x/I,
+					y: predkosci_katowe_pilki.y + punkt_odbicia_wzgl_pilki_z_impulsem.y/I,
+					z: predkosci_katowe_pilki.z + punkt_odbicia_wzgl_pilki_z_impulsem.z/I,
+				}
+
+				//zapewnienie wyjścia piłki z miejsca odbicia
+				for pilka.posZ > z_tablicy+szerokosc_tablicy/2 &&
+					pilka.posY > y_tablicy+wysokosc_tablicy/2 &&
+					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					pilka.posX = pilka.posX + predkosci_pilki.x*krok_czasowy
 					pilka.posY = pilka.posY + predkosci_pilki.y*krok_czasowy + g*krok_czasowy*krok_czasowy/2
@@ -807,7 +882,6 @@ func main() {
 			rotationAxis = rl.NewVector3(float32(os[0]), float32(os[1]), float32(os[2]))
 			rotationAngle = float32(kat * 180 / math.Pi)
 		}
-
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.RayWhite)
@@ -852,8 +926,8 @@ func main() {
 
 		rl.EndDrawing()
 	}
-
 	// De-initialization
+
 	rl.UnloadTexture(texture)
 	rl.UnloadModel(sphereModel)
 
@@ -880,5 +954,12 @@ func iloczyn_wektorowy(wektor_1 Wektor, wektor_2 Wektor) Wektor {
 		x: wektor_1.y*wektor_2.z - wektor_1.z*wektor_2.y,
 		y: wektor_1.z*wektor_2.x - wektor_1.x - wektor_2.z,
 		z: wektor_1.x*wektor_2.y - wektor_1.y - wektor_2.x,
+	}
+}
+func dodaj_wektory(wektor_1 Wektor, wektor_2 Wektor) Wektor {
+	return Wektor{
+		x: wektor_1.x + wektor_2.x,
+		y: wektor_1.y + wektor_2.y,
+		z: wektor_1.z + wektor_2.z,
 	}
 }
