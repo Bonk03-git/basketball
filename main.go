@@ -5,8 +5,10 @@ import (
 	"github.com/g3n/engine/math32"
 	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/ungerik/go3d/float64/quaternion"
+	"github.com/wcharczuk/go-chart/v2"
 	"math"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -133,6 +135,21 @@ func main() {
 		y: wypadkowa_przyspieszen_katowych.y * czas_dzialania_sily_na_pilke,
 		z: wypadkowa_przyspieszen_katowych.z * czas_dzialania_sily_na_pilke,
 	}
+
+	px := []float64{float64(start_pos_x)}
+	//py := []float64{float64(start_pos_y)}
+	//pz := []float64{float64(start_pos_z)}
+	//ox := []float64{float64(start_rot_x)}
+	//oy := []float64{float64(start_rot_y)}
+	//oz := []float64{float64(start_rot_z)}
+	//vx := []float64{0}
+	//vy := []float64{0}
+	//vz := []float64{0}
+	//wx := []float64{0}
+	//wy := []float64{0}
+	//wz := []float64{0}
+	czas := []float64{0}
+	var liczba_krokow int = 0
 
 	rl.InitWindow(int32(szerokosc), int32(wysokosc), "Koszykówka")
 
@@ -415,6 +432,10 @@ func main() {
 					pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
 					pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
 					pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
+
+					liczba_krokow += 1
+					px = append(px, pilka.posX)
+					czas = append(czas, float64(liczba_krokow)*krok_czasowy)
 				}
 				odbicie += 1
 
@@ -451,6 +472,10 @@ func main() {
 					pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
 					pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
 					pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
+
+					liczba_krokow += 1
+					px = append(px, pilka.posX)
+					czas = append(czas, float64(liczba_krokow)*krok_czasowy)
 				}
 				println("Uderzona tablica")
 			}
@@ -517,6 +542,10 @@ func main() {
 					pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
 					pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
 					pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
+
+					liczba_krokow += 1
+					px = append(px, pilka.posX)
+					czas = append(czas, float64(liczba_krokow)*krok_czasowy)
 				}
 
 			}
@@ -583,6 +612,10 @@ func main() {
 					pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
 					pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
 					pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
+
+					liczba_krokow += 1
+					px = append(px, pilka.posX)
+					czas = append(czas, float64(liczba_krokow)*krok_czasowy)
 				}
 			}
 
@@ -649,6 +682,10 @@ func main() {
 					pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
 					pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
 					pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
+
+					liczba_krokow += 1
+					px = append(px, pilka.posX)
+					czas = append(czas, float64(liczba_krokow)*krok_czasowy)
 				}
 			}
 
@@ -715,6 +752,10 @@ func main() {
 					pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
 					pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
 					pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
+
+					liczba_krokow += 1
+					px = append(px, pilka.posX)
+					czas = append(czas, float64(liczba_krokow)*krok_czasowy)
 				}
 			}
 
@@ -803,7 +844,7 @@ func main() {
 				pilka.rotZ = float64(start_rot_z)
 				licznik = 0
 				licz_wartosci = true
-				faza_gry = 0
+				faza_gry = 2
 				odbicie = 0
 				for i := 0; i < 1; i++ { // todo 1 na 3
 					sila_ruszajaca[i] = 0
@@ -871,17 +912,22 @@ func main() {
 			pilka.rotY = pilnowanie_zakresu_kata(pilka.rotY)
 			pilka.rotZ = pilnowanie_zakresu_kata(pilka.rotZ)
 
+			liczba_krokow += 1
+			px = append(px, pilka.posX)
+			czas = append(czas, float64(liczba_krokow)*krok_czasowy)
+
 			qX := quaternion.FromXAxisAngle(pilka.rotX)
 			qY := quaternion.FromYAxisAngle(pilka.rotY)
 			qZ := quaternion.FromZAxisAngle(pilka.rotZ)
 
 			kwaternion_glowny := quaternion.Mul3(&qX, &qY, &qZ)
 
-			os, kat := kwaternion_glowny.AxisAngle()
+			oska, kat := kwaternion_glowny.AxisAngle()
 
-			rotationAxis = rl.NewVector3(float32(os[0]), float32(os[1]), float32(os[2]))
+			rotationAxis = rl.NewVector3(float32(oska[0]), float32(oska[1]), float32(oska[2]))
 			rotationAngle = float32(kat * 180 / math.Pi)
 		}
+
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.RayWhite)
@@ -931,6 +977,21 @@ func main() {
 	rl.UnloadTexture(texture)
 	rl.UnloadModel(sphereModel)
 
+	if faza_gry == 2 {
+		graph_px := chart.Chart{
+			Series: []chart.Series{
+				chart.ContinuousSeries{
+					XValues: czas,
+					YValues: px,
+				},
+			},
+		}
+		f, _ := os.Create("pozycja_x.png")
+		defer f.Close()
+		graph_px.Render(chart.PNG, f)
+
+		faza_gry = 0
+	}
 	rl.CloseWindow()
 }
 
