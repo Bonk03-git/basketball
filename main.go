@@ -57,7 +57,7 @@ func main() {
 	const fps = 100
 	const krok_czasowy = 1.0 / fps
 	const g float64 = -9.81
-	const wspolczynnik_odbicia = 0.6
+	const wspolczynnik_odbicia = 0.8
 	const stala_wzrostu_malenia = 1
 	const grubosc_tablicy = 0.01  // metry
 	const szerokosc_tablicy = 1.8 // metry
@@ -400,12 +400,14 @@ func main() {
 					z: odleglosc_punktu_od_pilki.z / pilka.promien,
 				}
 
-				var wartosc_predkosci_przed_uderzeniem = math.Sqrt(math.Pow(predkosci_pilki.x, 2) + math.Pow(predkosci_pilki.y, 2) + math.Pow(predkosci_pilki.z, 2))
+				var iloczyn_skalarny_predkosci_z_wersorem = predkosci_pilki.x*wersor_normalnej.x + predkosci_pilki.y*wersor_normalnej.y + predkosci_pilki.z*wersor_normalnej.z
+				var iloczyn_skalarny_wersora_z_wersorem = wersor_normalnej.x*wersor_normalnej.x + wersor_normalnej.y*wersor_normalnej.y + wersor_normalnej.z*wersor_normalnej.z
 
+				//predkość normalna żle wyznaczona
 				var predkosc_normalna = Wektor{
-					x: wartosc_predkosci_przed_uderzeniem * wersor_normalnej.x,
-					y: wartosc_predkosci_przed_uderzeniem * wersor_normalnej.y,
-					z: wartosc_predkosci_przed_uderzeniem * wersor_normalnej.z,
+					x: iloczyn_skalarny_predkosci_z_wersorem / iloczyn_skalarny_wersora_z_wersorem * wersor_normalnej.x,
+					y: iloczyn_skalarny_predkosci_z_wersorem / iloczyn_skalarny_wersora_z_wersorem * wersor_normalnej.y,
+					z: iloczyn_skalarny_predkosci_z_wersorem / iloczyn_skalarny_wersora_z_wersorem * wersor_normalnej.z,
 				}
 
 				var wartosc_predkosci_normalnej = math.Sqrt(math.Pow(predkosc_normalna.x, 2) + math.Pow(predkosc_normalna.y, 2) + math.Pow(predkosc_normalna.z, 2))
