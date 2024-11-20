@@ -54,10 +54,10 @@ func main() {
 	const szerokosc int = 1600
 	const wysokosc int = 900
 	const czas_dzialania_sily_na_pilke = 0.1
-	const fps = 200
+	const fps = 100
 	const krok_czasowy = 1.0 / fps
 	const g float64 = -9.81
-	const wspolczynnik_odbicia = 0.7
+	const wspolczynnik_odbicia = 0.6
 	const stala_wzrostu_malenia = 1
 	const grubosc_tablicy = 0.01  // metry
 	const szerokosc_tablicy = 1.8 // metry
@@ -66,6 +66,8 @@ func main() {
 	const y_tablicy = 3
 	const z_tablicy = 0
 	const wspolczynnik_momentu = 2.0 / 3.0
+	const wspolczynnik_tarcia = 0.5
+	const wspolczynnik_tangensa = 3
 
 	//100 px to 1 metr przedział
 
@@ -377,14 +379,80 @@ func main() {
 
 			//odbicie od ziemii
 			if pilka.posY-pilka.promien < 0 {
-				pilka.posY = pilka.promien
+				/*pilka.posY = pilka.promien
 				bufor_x := predkosci_pilki.x
 				bufor_z := predkosci_pilki.z
 				predkosci_pilki.y = -predkosci_pilki.y * wspolczynnik_odbicia
 				predkosci_pilki.x = wspolczynnik_odbicia * (bufor_x - wspolczynnik_momentu*pilka.promien*predkosci_katowe_pilki.z)
 				predkosci_pilki.z = wspolczynnik_odbicia * (bufor_z + wspolczynnik_momentu*pilka.promien*predkosci_katowe_pilki.x)
 				predkosci_katowe_pilki.x = wspolczynnik_odbicia * (predkosci_katowe_pilki.x + wspolczynnik_momentu*bufor_z/pilka.promien)
-				predkosci_katowe_pilki.z = wspolczynnik_odbicia * (predkosci_katowe_pilki.z - wspolczynnik_momentu*bufor_x/pilka.promien)
+				predkosci_katowe_pilki.z = wspolczynnik_odbicia * (predkosci_katowe_pilki.z - wspolczynnik_momentu*bufor_x/pilka.promien)*/
+
+				var odleglosc_punktu_od_pilki = Wektor{
+					x: 0,
+					y: -pilka.promien,
+					z: 0,
+				}
+
+				var wersor_normalnej = Wektor{
+					x: odleglosc_punktu_od_pilki.x / pilka.promien,
+					y: odleglosc_punktu_od_pilki.y / pilka.promien,
+					z: odleglosc_punktu_od_pilki.z / pilka.promien,
+				}
+
+				var wartosc_predkosci_przed_uderzeniem = math.Sqrt(math.Pow(predkosci_pilki.x, 2) + math.Pow(predkosci_pilki.y, 2) + math.Pow(predkosci_pilki.z, 2))
+
+				var predkosc_normalna = Wektor{
+					x: wartosc_predkosci_przed_uderzeniem * wersor_normalnej.x,
+					y: wartosc_predkosci_przed_uderzeniem * wersor_normalnej.y,
+					z: wartosc_predkosci_przed_uderzeniem * wersor_normalnej.z,
+				}
+
+				var wartosc_predkosci_normalnej = math.Sqrt(math.Pow(predkosc_normalna.x, 2) + math.Pow(predkosc_normalna.y, 2) + math.Pow(predkosc_normalna.z, 2))
+
+				var omega_wektorowo_z_promieniem = iloczyn_wektorowy(predkosci_katowe_pilki, odleglosc_punktu_od_pilki)
+
+				var predkosc_styczna = Wektor{
+					x: omega_wektorowo_z_promieniem.x + predkosci_pilki.x - predkosc_normalna.x,
+					y: omega_wektorowo_z_promieniem.y + predkosci_pilki.y - predkosc_normalna.y,
+					z: omega_wektorowo_z_promieniem.z + predkosci_pilki.z - predkosc_normalna.z,
+				}
+
+				var wartosc_predkosci_stycznej = math.Sqrt(math.Pow(predkosc_styczna.x, 2) + math.Pow(predkosc_styczna.y, 2) + math.Pow(predkosc_styczna.z, 2))
+
+				var wersor_stycznej = Wektor{
+					x: predkosc_styczna.x / wartosc_predkosci_stycznej,
+					y: predkosc_styczna.y / wartosc_predkosci_stycznej,
+					z: predkosc_styczna.z / wartosc_predkosci_stycznej,
+				}
+
+				var wartosc_sily_nacisku = pilka.masa * wartosc_predkosci_normalnej * (1 + wspolczynnik_odbicia) / krok_czasowy
+
+				var sila_tarcia = Wektor{
+					x: -wspolczynnik_tarcia * wartosc_sily_nacisku * math.Tanh(wartosc_predkosci_stycznej/wspolczynnik_tangensa) * wersor_stycznej.x,
+					y: -wspolczynnik_tarcia * wartosc_sily_nacisku * math.Tanh(wartosc_predkosci_stycznej/wspolczynnik_tangensa) * wersor_stycznej.y,
+					z: -wspolczynnik_tarcia * wartosc_sily_nacisku * math.Tanh(wartosc_predkosci_stycznej/wspolczynnik_tangensa) * wersor_stycznej.z,
+				}
+
+				var moment_sily = iloczyn_wektorowy(odleglosc_punktu_od_pilki, sila_tarcia)
+
+				var przyspieszenie_katowe = Wektor{
+					x: moment_sily.x / I,
+					y: moment_sily.y / I,
+					z: moment_sily.z / I,
+				}
+				println(predkosc_normalna.y, " ", predkosci_pilki.y)
+				predkosci_pilki = Wektor{
+					x: predkosci_pilki.x - (1+wspolczynnik_odbicia)*predkosc_normalna.x,
+					y: predkosci_pilki.y - (1+wspolczynnik_odbicia)*predkosc_normalna.y,
+					z: predkosci_pilki.z - (1+wspolczynnik_odbicia)*predkosc_normalna.z,
+				}
+				println(predkosc_normalna.y, " ", predkosci_pilki.y)
+				predkosci_katowe_pilki = Wektor{
+					x: predkosci_katowe_pilki.x + przyspieszenie_katowe.x*krok_czasowy,
+					y: predkosci_katowe_pilki.y + przyspieszenie_katowe.y*krok_czasowy,
+					z: predkosci_katowe_pilki.z + przyspieszenie_katowe.z*krok_czasowy,
+				}
 
 				for pilka.posY-pilka.promien < 0 {
 
@@ -708,8 +776,89 @@ func main() {
 
 			//krawedz gora
 			if pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posX > x_tablicy-grubosc_tablicy/2-pilka.promien && pilka.posX < x_tablicy+grubosc_tablicy/2+pilka.promien && pilka.posY > y_tablicy+wysokosc_tablicy/2 && (math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)) < math.Pow(pilka.promien, 2) {
+				var punkt_odbicia_wzgl_pilki = Wektor{
+					x: x_tablicy - pilka.posX,
+					y: -pilka.posY + y_tablicy + wysokosc_tablicy/2,
+					z: 0.0,
+				}
 
-				println("krawedz gora")
+				dlugosc_wektora_puktu_odbicia_od_pilki := math.Sqrt(math.Pow(punkt_odbicia_wzgl_pilki.x, 2) + math.Pow(punkt_odbicia_wzgl_pilki.y, 2) + math.Pow(punkt_odbicia_wzgl_pilki.z, 2))
+
+				var predkosc_katowa_z_punktem_odbicia = iloczyn_wektorowy(predkosci_katowe_pilki, punkt_odbicia_wzgl_pilki)
+
+				var predkosc_punktu_styku_przed_odbiciem = dodaj_wektory(predkosci_pilki, predkosc_katowa_z_punktem_odbicia)
+
+				//wektor normalny
+
+				var wektor_normalny = Wektor{
+					x: punkt_odbicia_wzgl_pilki.x / dlugosc_wektora_puktu_odbicia_od_pilki,
+					y: punkt_odbicia_wzgl_pilki.y / dlugosc_wektora_puktu_odbicia_od_pilki,
+					z: punkt_odbicia_wzgl_pilki.z / dlugosc_wektora_puktu_odbicia_od_pilki,
+				}
+
+				wartosc_predkosci_normalnej := predkosc_punktu_styku_przed_odbiciem.x*wektor_normalny.x + predkosc_punktu_styku_przed_odbiciem.y*wektor_normalny.y + predkosc_punktu_styku_przed_odbiciem.z*wektor_normalny.z
+
+				var predkosc_normalna = Wektor{
+					x: wartosc_predkosci_normalnej * wektor_normalny.x,
+					y: wartosc_predkosci_normalnej * wektor_normalny.y,
+					z: wartosc_predkosci_normalnej * wektor_normalny.z,
+				}
+
+				var predkosc_styczna = Wektor{
+					x: predkosc_punktu_styku_przed_odbiciem.x - predkosc_normalna.x,
+					y: predkosc_punktu_styku_przed_odbiciem.y - predkosc_normalna.y,
+					z: predkosc_punktu_styku_przed_odbiciem.z - predkosc_normalna.z,
+				}
+
+				var wartosc_predkosci_stycznej = math.Sqrt(math.Pow(predkosc_styczna.x, 2) + math.Pow(predkosc_styczna.y, 2) + math.Pow(predkosc_styczna.z, 2))
+
+				var wektor_styczny = Wektor{
+					x: predkosc_styczna.x / wartosc_predkosci_stycznej,
+					y: predkosc_styczna.y / wartosc_predkosci_stycznej,
+					z: predkosc_styczna.z / wartosc_predkosci_stycznej,
+				}
+
+				wartosc_impulsu_normalnego := -(1 + wspolczynnik_odbicia) * pilka.masa * wartosc_predkosci_normalnej
+
+				var impuls_normalny = Wektor{
+					x: wartosc_impulsu_normalnego * wektor_normalny.x,
+					y: wartosc_impulsu_normalnego * wektor_normalny.y,
+					z: wartosc_impulsu_normalnego * wektor_normalny.z,
+				}
+
+				var impuls_tarcia = Wektor{
+					x: -wspolczynnik_tarcia * wartosc_impulsu_normalnego * wektor_styczny.x,
+					y: -wspolczynnik_tarcia * wartosc_impulsu_normalnego * wektor_styczny.y,
+					z: -wspolczynnik_tarcia * wartosc_impulsu_normalnego * wektor_styczny.z,
+				}
+
+				var delta_predkosci_liniowej = Wektor{
+					x: (impuls_normalny.x + impuls_tarcia.x) / pilka.masa,
+					y: (impuls_normalny.y + impuls_tarcia.y) / pilka.masa,
+					z: (impuls_normalny.z + impuls_tarcia.z) / pilka.masa,
+				}
+
+				bufor := iloczyn_wektorowy(punkt_odbicia_wzgl_pilki, dodaj_wektory(impuls_normalny, impuls_tarcia))
+
+				var delta_predkosci_katowej = Wektor{
+					x: bufor.x / I,
+					y: bufor.y / I,
+					z: bufor.z / I,
+				}
+
+				predkosci_pilki = Wektor{
+					x: predkosci_pilki.x + delta_predkosci_liniowej.x,
+					y: predkosci_pilki.y + delta_predkosci_liniowej.y,
+					z: predkosci_pilki.z + delta_predkosci_liniowej.z,
+				}
+
+				predkosci_katowe_pilki = Wektor{
+					x: predkosci_katowe_pilki.x + delta_predkosci_katowej.x,
+					y: predkosci_katowe_pilki.y + delta_predkosci_katowej.y,
+					z: predkosci_katowe_pilki.z + delta_predkosci_katowej.z,
+				}
+
+				/*println("krawedz gora")
 				var predkosci_pocz = Wektor{
 					x: predkosci_pilki.x,
 					y: predkosci_pilki.y,
@@ -752,7 +901,7 @@ func main() {
 				predkosci_katowe_pilki.x = predkosci_katowe_pilki.x + delta_katowa.x
 				predkosci_katowe_pilki.y = predkosci_katowe_pilki.y + delta_katowa.y
 				predkosci_katowe_pilki.z = predkosci_katowe_pilki.z + delta_katowa.z
-
+				*/
 				//zapewnienie wyjścia piłki z obszaru odbicia
 				for pilka.posZ < z_tablicy+szerokosc_tablicy/2 &&
 					pilka.posZ > z_tablicy-szerokosc_tablicy/2 &&
@@ -895,44 +1044,72 @@ func main() {
 
 				//wektor normalny
 
-				var normalna = Wektor{
+				var wektor_normalny = Wektor{
 					x: punkt_odbicia_wzgl_pilki.x / dlugosc_wektora_puktu_odbicia_od_pilki,
 					y: punkt_odbicia_wzgl_pilki.y / dlugosc_wektora_puktu_odbicia_od_pilki,
 					z: punkt_odbicia_wzgl_pilki.z / dlugosc_wektora_puktu_odbicia_od_pilki,
 				}
 
-				predkosc_normalna := predkosci_pilki.x*normalna.x + predkosci_pilki.y*normalna.y + predkosci_pilki.z*normalna.z
+				wartosc_predkosci_normalnej := predkosc_punktu_styku_przed_odbiciem.x*wektor_normalny.x + predkosc_punktu_styku_przed_odbiciem.y*wektor_normalny.y + predkosc_punktu_styku_przed_odbiciem.z*wektor_normalny.z
+
+				var predkosc_normalna = Wektor{
+					x: wartosc_predkosci_normalnej * wektor_normalny.x,
+					y: wartosc_predkosci_normalnej * wektor_normalny.y,
+					z: wartosc_predkosci_normalnej * wektor_normalny.z,
+				}
 
 				var predkosc_styczna = Wektor{
-					x: predkosc_punktu_styku_przed_odbiciem.x - predkosc_normalna*normalna.x,
-					y: predkosc_punktu_styku_przed_odbiciem.y - predkosc_normalna*normalna.y,
-					z: predkosc_punktu_styku_przed_odbiciem.z - predkosc_normalna*normalna.z,
+					x: predkosc_punktu_styku_przed_odbiciem.x - predkosc_normalna.x,
+					y: predkosc_punktu_styku_przed_odbiciem.y - predkosc_normalna.y,
+					z: predkosc_punktu_styku_przed_odbiciem.z - predkosc_normalna.z,
 				}
 
-				predkosc_normalna = -wspolczynnik_odbicia * predkosc_normalna
+				var wartosc_predkosci_stycznej = math.Sqrt(math.Pow(predkosc_styczna.x, 2) + math.Pow(predkosc_styczna.y, 2) + math.Pow(predkosc_styczna.z, 2))
 
-				var predkosc_punktu_styku_po_odbiciu = Wektor{
-					x: predkosc_normalna*normalna.x + predkosc_styczna.x,
-					y: predkosc_normalna*normalna.y + predkosc_styczna.y,
-					z: predkosc_normalna*normalna.z + predkosc_styczna.z,
+				var wektor_styczny = Wektor{
+					x: predkosc_styczna.x / wartosc_predkosci_stycznej,
+					y: predkosc_styczna.y / wartosc_predkosci_stycznej,
+					z: predkosc_styczna.z / wartosc_predkosci_stycznej,
 				}
 
-				var impuls = Wektor{
-					x: -pilka.masa * (predkosc_punktu_styku_po_odbiciu.x - predkosc_punktu_styku_przed_odbiciem.x),
-					y: -pilka.masa * (predkosc_punktu_styku_po_odbiciu.y - predkosc_punktu_styku_przed_odbiciem.y),
-					z: -pilka.masa * (predkosc_punktu_styku_po_odbiciu.z - predkosc_punktu_styku_przed_odbiciem.z),
+				wartosc_impulsu_normalnego := -(1 + wspolczynnik_odbicia) * pilka.masa * wartosc_predkosci_normalnej
+
+				var impuls_normalny = Wektor{
+					x: wartosc_impulsu_normalnego * wektor_normalny.x,
+					y: wartosc_impulsu_normalnego * wektor_normalny.y,
+					z: wartosc_impulsu_normalnego * wektor_normalny.z,
 				}
+
+				var impuls_tarcia = Wektor{
+					x: -wspolczynnik_tarcia * wartosc_impulsu_normalnego * wektor_styczny.x,
+					y: -wspolczynnik_tarcia * wartosc_impulsu_normalnego * wektor_styczny.y,
+					z: -wspolczynnik_tarcia * wartosc_impulsu_normalnego * wektor_styczny.z,
+				}
+
+				var delta_predkosci_liniowej = Wektor{
+					x: (impuls_normalny.x + impuls_tarcia.x) / pilka.masa,
+					y: (impuls_normalny.y + impuls_tarcia.y) / pilka.masa,
+					z: (impuls_normalny.z + impuls_tarcia.z) / pilka.masa,
+				}
+
+				bufor := iloczyn_wektorowy(punkt_odbicia_wzgl_pilki, dodaj_wektory(impuls_normalny, impuls_tarcia))
+
+				var delta_predkosci_katowej = Wektor{
+					x: bufor.x / I,
+					y: bufor.y / I,
+					z: bufor.z / I,
+				}
+
 				predkosci_pilki = Wektor{
-					x: predkosci_pilki.x + impuls.x/pilka.masa,
-					y: predkosci_pilki.y + impuls.y/pilka.masa,
-					z: predkosci_pilki.z + impuls.z/pilka.masa,
+					x: predkosci_pilki.x + delta_predkosci_liniowej.x,
+					y: predkosci_pilki.y + delta_predkosci_liniowej.y,
+					z: predkosci_pilki.z + delta_predkosci_liniowej.z,
 				}
-				var punkt_odbicia_wzgl_pilki_z_impulsem = iloczyn_wektorowy(punkt_odbicia_wzgl_pilki, impuls)
 
 				predkosci_katowe_pilki = Wektor{
-					x: predkosci_katowe_pilki.x + punkt_odbicia_wzgl_pilki_z_impulsem.x/I,
-					y: predkosci_katowe_pilki.y + punkt_odbicia_wzgl_pilki_z_impulsem.y/I,
-					z: predkosci_katowe_pilki.z + punkt_odbicia_wzgl_pilki_z_impulsem.z/I,
+					x: predkosci_katowe_pilki.x + delta_predkosci_katowej.x,
+					y: predkosci_katowe_pilki.y + delta_predkosci_katowej.y,
+					z: predkosci_katowe_pilki.z + delta_predkosci_katowej.z,
 				}
 
 				//zapewnienie wyjścia piłki z miejsca odbicia
@@ -953,6 +1130,96 @@ func main() {
 					pilka.rotY = pilnowanie_zakresu_kata(pilka.rotY)
 					pilka.rotZ = pilnowanie_zakresu_kata(pilka.rotZ)
 				}
+			}
+
+			// lewy gorny rog
+			if pilka.posZ < z_tablicy-szerokosc_tablicy/2 && pilka.posY > y_tablicy+wysokosc_tablicy/2 && math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy+szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
+
+				var odleglosc_punktu_od_pilki = Wektor{
+					x: x_tablicy - pilka.posX,
+					y: y_tablicy + wysokosc_tablicy/2 - pilka.posY,
+					z: z_tablicy - szerokosc_tablicy/2 - pilka.posZ,
+				}
+
+				var wersor_normalnej = Wektor{
+					x: odleglosc_punktu_od_pilki.x / pilka.promien,
+					y: odleglosc_punktu_od_pilki.y / pilka.promien,
+					z: odleglosc_punktu_od_pilki.z / pilka.promien,
+				}
+
+				var wartosc_predkosci_przed_uderzeniem = math.Sqrt(math.Pow(predkosci_pilki.x, 2) + math.Pow(predkosci_pilki.y, 2) + math.Pow(predkosci_pilki.z, 2))
+
+				var predkosc_normalna = Wektor{
+					x: wartosc_predkosci_przed_uderzeniem * wersor_normalnej.x,
+					y: wartosc_predkosci_przed_uderzeniem * wersor_normalnej.y,
+					z: wartosc_predkosci_przed_uderzeniem * wersor_normalnej.z,
+				}
+
+				var wartosc_predkosci_normalnej = math.Sqrt(math.Pow(predkosc_normalna.x, 2) + math.Pow(predkosc_normalna.y, 2) + math.Pow(predkosc_normalna.z, 2))
+
+				var omega_wektorowo_z_promieniem = iloczyn_wektorowy(predkosci_katowe_pilki, odleglosc_punktu_od_pilki)
+
+				var predkosc_styczna = Wektor{
+					x: omega_wektorowo_z_promieniem.x + predkosci_pilki.x - predkosc_normalna.x,
+					y: omega_wektorowo_z_promieniem.y + predkosci_pilki.y - predkosc_normalna.y,
+					z: omega_wektorowo_z_promieniem.z + predkosci_pilki.z - predkosc_normalna.z,
+				}
+
+				var wartosc_predkosci_stycznej = math.Sqrt(math.Pow(predkosc_styczna.x, 2) + math.Pow(predkosc_styczna.y, 2) + math.Pow(predkosc_styczna.z, 2))
+
+				var wersor_stycznej = Wektor{
+					x: predkosc_styczna.x / wartosc_predkosci_stycznej,
+					y: predkosc_styczna.y / wartosc_predkosci_stycznej,
+					z: predkosc_styczna.z / wartosc_predkosci_stycznej,
+				}
+
+				var wartosc_sily_nacisku = pilka.masa * wartosc_predkosci_normalnej * (1 + wspolczynnik_odbicia) / krok_czasowy
+
+				var sila_tarcia = Wektor{
+					x: -wspolczynnik_tarcia * wartosc_sily_nacisku * math.Tanh(wartosc_predkosci_stycznej/wspolczynnik_tangensa) * wersor_stycznej.x,
+					y: -wspolczynnik_tarcia * wartosc_sily_nacisku * math.Tanh(wartosc_predkosci_stycznej/wspolczynnik_tangensa) * wersor_stycznej.y,
+					z: -wspolczynnik_tarcia * wartosc_sily_nacisku * math.Tanh(wartosc_predkosci_stycznej/wspolczynnik_tangensa) * wersor_stycznej.z,
+				}
+
+				var moment_sily = iloczyn_wektorowy(odleglosc_punktu_od_pilki, sila_tarcia)
+
+				var przyspieszenie_katowe = Wektor{
+					x: moment_sily.x / I,
+					y: moment_sily.y / I,
+					z: moment_sily.z / I,
+				}
+
+				predkosci_pilki = Wektor{
+					x: predkosci_pilki.x - (1+wspolczynnik_odbicia)*predkosc_normalna.x,
+					y: predkosci_pilki.y - (1+wspolczynnik_odbicia)*predkosc_normalna.y,
+					z: predkosci_pilki.z - (1+wspolczynnik_odbicia)*predkosc_normalna.z,
+				}
+
+				predkosci_katowe_pilki = Wektor{
+					x: predkosci_katowe_pilki.x + przyspieszenie_katowe.x*krok_czasowy,
+					y: predkosci_katowe_pilki.y + przyspieszenie_katowe.y*krok_czasowy,
+					z: predkosci_katowe_pilki.z + przyspieszenie_katowe.z*krok_czasowy,
+				}
+
+				//zapewnienie wyjścia piłki z miejsca odbicia
+				for pilka.posZ < z_tablicy-szerokosc_tablicy/2 &&
+					pilka.posY > y_tablicy+wysokosc_tablicy/2 &&
+					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
+
+					pilka.posX = pilka.posX + predkosci_pilki.x*krok_czasowy
+					pilka.posY = pilka.posY + predkosci_pilki.y*krok_czasowy + g*krok_czasowy*krok_czasowy/2
+					predkosci_pilki.y = predkosci_pilki.y + g*krok_czasowy
+					pilka.posZ = pilka.posZ + predkosci_pilki.z*krok_czasowy
+
+					pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
+					pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
+					pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
+
+					pilka.rotX = pilnowanie_zakresu_kata(pilka.rotX)
+					pilka.rotY = pilnowanie_zakresu_kata(pilka.rotY)
+					pilka.rotZ = pilnowanie_zakresu_kata(pilka.rotZ)
+				}
+
 			}
 
 			pilka.posX = pilka.posX + predkosci_pilki.x*krok_czasowy
