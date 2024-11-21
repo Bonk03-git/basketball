@@ -62,12 +62,14 @@ func main() {
 	const grubosc_tablicy = 0.01  // metry
 	const szerokosc_tablicy = 1.8 // metry
 	const wysokosc_tablicy = 1.05 //metry
-	const x_tablicy = 5
-	const y_tablicy = 3
-	const z_tablicy = 0
+	const x_tablicy = 5.0
+	const y_tablicy = 3.0
+	const z_tablicy = 0.0
 	const wspolczynnik_momentu = 2.0 / 3.0
 	const wspolczynnik_tarcia = 0.5
-	const wspolczynnik_tangensa = 10
+	const wspolczynnik_tangensa = 10.0
+	const srednica_obreczy = 0.5
+	const stosunek_promienia_obreczy_do_promienia_przekroju = 0.1
 
 	//100 px to 1 metr przedział
 
@@ -202,7 +204,7 @@ func main() {
 	basketPosition := rl.NewVector3(x_tablicy, y_tablicy, z_tablicy)
 
 	//obrecz
-	hoopMesh := rl.GenMeshTorus(0.1, 0.5, 16, 32)
+	hoopMesh := rl.GenMeshTorus(stosunek_promienia_obreczy_do_promienia_przekroju, srednica_obreczy, 16, 32)
 	hoopModel := rl.LoadModelFromMesh(hoopMesh)
 
 	texture_3 := rl.LoadTexture("czerwony.jpg")
@@ -211,6 +213,15 @@ func main() {
 	rl.SetMaterialTexture(&materials_3[0], rl.MapDiffuse, texture_3)
 
 	hoopPosition := rl.NewVector3(basketPosition.X-0.28, basketPosition.Y-0.3, basketPosition.Z)
+
+	var pozycja_srodka_obreczy = Wektor{
+		x: float64(hoopPosition.X),
+		y: float64(hoopPosition.Y),
+		z: float64(hoopPosition.Z),
+	}
+
+	promien_obreczy := srednica_obreczy / 2
+	promien_przekroju_obreczy := promien_obreczy * stosunek_promienia_obreczy_do_promienia_przekroju
 
 	rotationAngle := float32(0.0)
 	rotationAxis := rl.NewVector3(1.0, 1.0, 0.0)
@@ -391,7 +402,7 @@ func main() {
 
 				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
 
-				// zapewnienie wyjścia
+				// zapewnienie wyjscia
 				for pilka.posY-pilka.promien < 0 {
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
 				}
@@ -615,6 +626,45 @@ func main() {
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
 				}
 				czy_byl_rog = true
+			}
+
+			//obrecz
+
+			if math.Pow(pilka.posX-pozycja_srodka_obreczy.x, 2)+math.Pow(pilka.posZ-pozycja_srodka_obreczy.z, 2) < math.Pow(promien_obreczy+promien_przekroju_obreczy+pilka.promien, 2) && math.Pow(pilka.posX-pozycja_srodka_obreczy.x, 2)+math.Pow(pilka.posZ-pozycja_srodka_obreczy.z, 2) > math.Pow(promien_obreczy-promien_przekroju_obreczy-pilka.promien, 2) && pilka.posY < pozycja_srodka_obreczy.y+promien_przekroju_obreczy+pilka.promien && pilka.posY > pozycja_srodka_obreczy.y-promien_przekroju_obreczy-pilka.promien {
+
+				// wektor z ktorego wyznaczamy kierunek normlanej na ktorej lezy punkt w srodku obreczy najblizszy srodkowi pilki
+
+				var wektor_odleglosci_pilki_od_centrum_obreczy = Wektor{
+					x: pilka.posX - pozycja_srodka_obreczy.x,
+					y: 0,
+					z: pilka.posZ - pozycja_srodka_obreczy.z,
+				}
+
+				dlugosc_wektora := math.Sqrt(math.Pow(wektor_odleglosci_pilki_od_centrum_obreczy.x, 2) + math.Pow(wektor_odleglosci_pilki_od_centrum_obreczy.z, 2))
+
+				var normalna = Wektor{
+					x: wektor_odleglosci_pilki_od_centrum_obreczy.x / dlugosc_wektora,
+					y: 0,
+					z: wektor_odleglosci_pilki_od_centrum_obreczy.z / dlugosc_wektora,
+				}
+
+				var punkt_w_obreczy_najblizej_pilki = Wektor{
+					x: pozycja_srodka_obreczy.x + normalna.x*promien_obreczy,
+					y: pozycja_srodka_obreczy.y,
+					z: pozycja_srodka_obreczy.z + normalna.z*promien_obreczy,
+				}
+
+				var wektor_odleglosci_pilki_od_punktu_w_srodku_obreczy = Wektor{
+					x: pilka.posX - punkt_w_obreczy_najblizej_pilki.x,
+					y: pilka.posY - punkt_w_obreczy_najblizej_pilki.y,
+					z: pilka.posZ - punkt_w_obreczy_najblizej_pilki.z,
+				}
+
+				odleglosc_pilki_od_punktu_w_obreczy := math.Sqrt(math.Pow(wektor_odleglosci_pilki_od_punktu_w_srodku_obreczy.x, 2) + math.Pow(wektor_odleglosci_pilki_od_punktu_w_srodku_obreczy.y, 2) + math.Pow(wektor_odleglosci_pilki_od_punktu_w_srodku_obreczy.z, 2))
+
+				if odleglosc_pilki_od_punktu_w_obreczy < pilka.promien+promien_przekroju_obreczy {
+					println("zderzenie")
+				}
 			}
 
 			// obliczanie w powietrzu
