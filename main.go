@@ -247,9 +247,6 @@ func main() {
 
 		rl.UpdateCamera(&camera, rl.CameraFree)
 
-		if rl.IsKeyPressed(rl.KeyZ) {
-			camera.Target = rl.NewVector3(0.0, 0.0, 0.0)
-		}
 		if faza_gry == 0 {
 			for i := 0; i < 1; i++ { // todo 1 na 3
 				if licznik == 5 {
@@ -267,42 +264,27 @@ func main() {
 					punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[i].kat_teta)*math.Sin(punkty_przylozenia_wektorow[i].kat_fi))
 					punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[i].kat_teta))
 					punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[i].kat_teta)*math.Cos(punkty_przylozenia_wektorow[i].kat_fi))
-					punkty_przylozenia_wektorow[i].kat_teta = po_wcisnieciu(punkty_przylozenia_wektorow[i].kat_teta, 2*math32.Pi/360)
-					if rl.IsKeyPressed(rl.KeyEnter) {
-						licznik += 1
-					}
+					po_wcisnieciu(&punkty_przylozenia_wektorow[i].kat_teta, &licznik, math32.Pi/360)
 				}
 				if licznik == 3 {
 					rl.DrawText(fmt.Sprintf("Przylozenie sily kat fi = %f", punkty_przylozenia_wektorow[i].kat_fi), 10, 10, 20, rl.DarkGray)
 					punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[i].kat_teta)*math.Sin(punkty_przylozenia_wektorow[i].kat_fi))
 					punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[i].kat_teta))
 					punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[i].kat_teta)*math.Cos(punkty_przylozenia_wektorow[i].kat_fi))
-					punkty_przylozenia_wektorow[i].kat_fi = po_wcisnieciu(punkty_przylozenia_wektorow[i].kat_fi, 2*math32.Pi/360)
-					if rl.IsKeyPressed(rl.KeyEnter) {
-						licznik += 1
-					}
+					po_wcisnieciu(&punkty_przylozenia_wektorow[i].kat_fi, &licznik, math32.Pi/360)
 				}
 				if licznik == 2 {
 					rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku z= %f", wektory_sily[i].dlugosc_z), 10, 10, 20, rl.DarkGray)
-					wektory_sily[i].dlugosc_z = po_wcisnieciu(wektory_sily[i].dlugosc_z, stala_wzrostu_malenia)
-					if rl.IsKeyPressed(rl.KeyEnter) {
-						licznik += 1
-					}
+					po_wcisnieciu(&wektory_sily[i].dlugosc_z, &licznik, stala_wzrostu_malenia)
 				}
 				if licznik == 1 {
 					rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku y= %f", wektory_sily[i].dlugosc_y), 10, 10, 20, rl.DarkGray)
-					wektory_sily[i].dlugosc_y = po_wcisnieciu(wektory_sily[i].dlugosc_y, stala_wzrostu_malenia)
-					if rl.IsKeyPressed(rl.KeyEnter) {
-						licznik += 1
-					}
+					po_wcisnieciu(&wektory_sily[i].dlugosc_y, &licznik, stala_wzrostu_malenia)
 				}
 
 				if licznik == 0 {
 					rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku x= %f", wektory_sily[i].dlugosc_x), 10, 10, 20, rl.DarkGray)
-					wektory_sily[i].dlugosc_x = po_wcisnieciu(wektory_sily[i].dlugosc_x, stala_wzrostu_malenia)
-					if rl.IsKeyPressed(rl.KeyEnter) {
-						licznik += 1
-					}
+					po_wcisnieciu(&wektory_sily[i].dlugosc_x, &licznik, stala_wzrostu_malenia)
 				}
 
 			}
@@ -779,49 +761,36 @@ func main() {
 
 	rl.CloseWindow()
 
-	zapisz_obraz(czas, px, "pozycja_x.png")
-	zapisz_obraz(czas, py, "pozycja_y.png")
-	zapisz_obraz(czas, pz, "pozycja_z.png")
-	zapisz_obraz(czas, ox, "obrot_x.png")
-	zapisz_obraz(czas, oy, "obrot_y.png")
-	zapisz_obraz(czas, oz, "obrot_z.png")
-	zapisz_obraz(czas, vx, "predkosc_liniowa_x.png")
-	zapisz_obraz(czas, vy, "predkosc_liniowa_y.png")
-	zapisz_obraz(czas, vz, "predkosc_liniowa_z.png")
-	zapisz_obraz(czas, wx, "predkosc_katowa_x.png")
-	zapisz_obraz(czas, wy, "predkosc_katowa_y.png")
-	zapisz_obraz(czas, wz, "predkosc_katowa_z.png")
+	zapisz_obraz(czas, px, "pozycja_x.png", "Czas [s]", "Pozycja wzdluz osi X [m]")
+	zapisz_obraz(czas, py, "pozycja_y.png", "Czas [s]", "Pozycja wzdluz osi Y [m]")
+	zapisz_obraz(czas, pz, "pozycja_z.png", "Czas [s]", "Pozycja wzdluz osi Z [m]")
+	zapisz_obraz(czas, ox, "obrot_x.png", "Czas [s]", "Obrot wokol osi X [rad]")
+	zapisz_obraz(czas, oy, "obrot_y.png", "Czas [s]", "Obrot wokol osi Y [rad]")
+	zapisz_obraz(czas, oz, "obrot_z.png", "Czas [s]", "Obrot wokol osi Z [rad]")
+	zapisz_obraz(czas, vx, "predkosc_liniowa_x.png", "Czas [s]", "Predkosc wzdluz osi X [m/s]")
+	zapisz_obraz(czas, vy, "predkosc_liniowa_y.png", "Czas [s]", "Predkosc wzdluz osi Y [m/s]")
+	zapisz_obraz(czas, vz, "predkosc_liniowa_z.png", "Czas [s]", "Predkosc wzdluz osi Z [m/s]")
+	zapisz_obraz(czas, wx, "predkosc_katowa_x.png", "Czas [s]", "Predkosc obrotowa wokol osi X [rad/s]")
+	zapisz_obraz(czas, wy, "predkosc_katowa_y.png", "Czas [s]", "Predkosc obrotowa wokol osi Y [rad/s]")
+	zapisz_obraz(czas, wz, "predkosc_katowa_z.png", "Czas [s]", "Predkosc obrotowa wokol osi Z [rad/s]")
 }
 
-func po_wcisnieciu(zmienna float64, zmiana float64) float64 {
+func po_wcisnieciu(zmienna *float64, licznik *int, zmiana float64) {
 	if rl.IsKeyPressed(rl.KeyI) {
-		zmienna += 10 * zmiana
+		*zmienna += 10 * zmiana
 	}
 	if rl.IsKeyPressed(rl.KeyU) {
-		zmienna += zmiana
+		*zmienna += zmiana
 	}
 	if rl.IsKeyPressed(rl.KeyY) {
-		zmienna -= zmiana
+		*zmienna -= zmiana
 	}
 	if rl.IsKeyPressed(rl.KeyT) {
-		zmienna -= 10 * zmiana
+		*zmienna -= 10 * zmiana
 	}
-	return zmienna
-}
-
-func pilnowanie_zakresu_kata(rotacja float64) float64 {
-	for i := 0; i < 1; i++ {
-
-		if rotacja > 2*math.Pi {
-			rotacja = rotacja - 2*math.Pi
-			i--
-		}
-		if rotacja < 0 {
-			rotacja = rotacja + 2*math.Pi
-			i--
-		}
+	if rl.IsKeyPressed(rl.KeyEnter) {
+		*licznik++
 	}
-	return rotacja
 }
 
 func iloczyn_wektorowy(wektor_1 Wektor, wektor_2 Wektor) Wektor {
@@ -832,8 +801,15 @@ func iloczyn_wektorowy(wektor_1 Wektor, wektor_2 Wektor) Wektor {
 	}
 }
 
-func zapisz_obraz(tab_x []float64, tab_y []float64, nazwa string) {
+func zapisz_obraz(tab_x []float64, tab_y []float64, nazwa string, nazwa_osi_x string, nazwa_osi_y string) {
+
 	graph := chart.Chart{
+		XAxis: chart.XAxis{
+			Name: nazwa_osi_x,
+		},
+		YAxis: chart.YAxis{
+			Name: nazwa_osi_y,
+		},
 		Series: []chart.Series{
 			chart.ContinuousSeries{
 				XValues: tab_x,
@@ -841,18 +817,54 @@ func zapisz_obraz(tab_x []float64, tab_y []float64, nazwa string) {
 			},
 		},
 	}
-	f, _ := os.Create(nazwa)
+
+	dlugosc := len(tab_y)
+	czy_same_zera := true
+
+	for i := 0; i < dlugosc; i++ {
+		if tab_y[i] != 0 {
+			czy_same_zera = false
+		}
+	}
+	if czy_same_zera {
+
+		graph = chart.Chart{
+			XAxis: chart.XAxis{
+				Name: nazwa_osi_x,
+			},
+			YAxis: chart.YAxis{
+				Name: nazwa_osi_y,
+
+				Range: &chart.ContinuousRange{
+					Min: -1,
+					Max: 1,
+				},
+			},
+			Series: []chart.Series{
+				chart.ContinuousSeries{
+					XValues: tab_x,
+					YValues: tab_y,
+				},
+			},
+		}
+	}
+	// Tworzenie pliku
+	f, err := os.Create(nazwa)
+	if err != nil {
+		panic(err)
+	}
 	defer func(f *os.File) {
 		err := f.Close()
 		if err != nil {
 
 		}
 	}(f)
-	err := graph.Render(chart.PNG, f)
+
+	// Renderowanie wykresu do pliku PNG
+	err = graph.Render(chart.PNG, f)
 	if err != nil {
-		return
+		panic(err)
 	}
-	return
 }
 
 func rownaj_do_zera(zmienna float64) float64 {
@@ -958,10 +970,6 @@ func zmiana_parametrow_w_czasie(pilka *Kula, predkosci_pilki *Wektor, predkosci_
 	pilka.rotX = pilka.rotX + predkosci_katowe_pilki.x*krok_czasowy
 	pilka.rotY = pilka.rotY + predkosci_katowe_pilki.y*krok_czasowy
 	pilka.rotZ = pilka.rotZ + predkosci_katowe_pilki.z*krok_czasowy
-
-	pilka.rotX = pilnowanie_zakresu_kata(pilka.rotX)
-	pilka.rotY = pilnowanie_zakresu_kata(pilka.rotY)
-	pilka.rotZ = pilnowanie_zakresu_kata(pilka.rotZ)
 
 	*liczba_krokow += 1
 	*px = append(*px, pilka.posX)

@@ -1,3 +1,5 @@
+github.com/blend/go-sdk v1.20240719.1 h1:eyispDP9DzQuNE+y7j1xSqwRm6ndMS4jgwlOQU4BTGY=
+github.com/blend/go-sdk v1.20240719.1/go.mod h1:aTw/exIbMHDYcJLTiqeWMMVhUs9+72BDe26AA0A6jno=
 github.com/ebitengine/purego v0.7.1 h1:6/55d26lG3o9VCZX8lping+bZcmShseiqlh2bnUDiPA=
 github.com/ebitengine/purego v0.7.1/go.mod h1:ah1In8AOtksoNK6yk5z1HTJeUkC1Ez4Wk2idgGslMwQ=
 github.com/g3n/engine v0.2.0 h1:7dmj4c+3xHcBnYrVmRuVf/oZ2JycxJU9Y+2FQj1Af2Y=
@@ -10,6 +12,8 @@ github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0/go.mod h1:E/TSTwGw
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/ungerik/go3d v0.0.0-20240502073936-1137f6adf7e9 h1:wMWP16Ijw+W+IXGcAzrwQDua1NBB4tP8iWECpg5DVRQ=
 github.com/ungerik/go3d v0.0.0-20240502073936-1137f6adf7e9/go.mod h1:ipEjrk2uLK4xX8ivWBPIVOD0fMtKyPI0strluUfIlYQ=
+github.com/wcharczuk/go-chart v2.0.1+incompatible h1:0pz39ZAycJFF7ju/1mepnk26RLVLBCWz1STcD3doU0A=
+github.com/wcharczuk/go-chart v2.0.1+incompatible/go.mod h1:PF5tmL4EIx/7Wf+hEkpCqYi5He4u90sw+0+6FhrryuE=
 github.com/wcharczuk/go-chart/v2 v2.1.2 h1:Y17/oYNuXwZg6TFag06qe8sBajwwsuvPiJJXcUcLL6E=
 github.com/wcharczuk/go-chart/v2 v2.1.2/go.mod h1:Zi4hbaqlWpYajnXB2K22IUYVXRXaLfSGNNR7P4ukyyQ=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
