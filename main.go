@@ -72,6 +72,7 @@ func main() {
 	const wspolczynnik_tangensa = 10.0
 	const srednica_obreczy = 0.5
 	const stosunek_promienia_obreczy_do_promienia_przekroju = 0.1
+	const max_sily = 50.0
 
 	//100 px to 1 metr przedział
 
@@ -276,15 +277,33 @@ func main() {
 				if licznik == 2 {
 					rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku z= %f", wektory_sily[i].dlugosc_z), 10, 10, 20, rl.DarkGray)
 					po_wcisnieciu(&wektory_sily[i].dlugosc_z, &licznik, stala_wzrostu_malenia)
+					if wektory_sily[i].dlugosc_z > max_sily {
+						wektory_sily[i].dlugosc_z = max_sily
+					}
+					if wektory_sily[i].dlugosc_z < -max_sily {
+						wektory_sily[i].dlugosc_z = -max_sily
+					}
 				}
 				if licznik == 1 {
 					rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku y= %f", wektory_sily[i].dlugosc_y), 10, 10, 20, rl.DarkGray)
 					po_wcisnieciu(&wektory_sily[i].dlugosc_y, &licznik, stala_wzrostu_malenia)
+					if wektory_sily[i].dlugosc_y > max_sily {
+						wektory_sily[i].dlugosc_y = max_sily
+					}
+					if wektory_sily[i].dlugosc_y < -max_sily {
+						wektory_sily[i].dlugosc_y = -max_sily
+					}
 				}
 
 				if licznik == 0 {
 					rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku x= %f", wektory_sily[i].dlugosc_x), 10, 10, 20, rl.DarkGray)
 					po_wcisnieciu(&wektory_sily[i].dlugosc_x, &licznik, stala_wzrostu_malenia)
+					if wektory_sily[i].dlugosc_x > max_sily {
+						wektory_sily[i].dlugosc_x = max_sily
+					}
+					if wektory_sily[i].dlugosc_x < -max_sily {
+						wektory_sily[i].dlugosc_x = -max_sily
+					}
 				}
 
 			}
@@ -670,8 +689,8 @@ func main() {
 			// obliczanie w powietrzu
 			zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
 
-			// powrot do rzutu gdy pilka sie 5 razy odbije od ziemii, za wysoko poleci albo za daleko
-			if odbicie == 5 || pilka.posY > 30 || pilka.posX > 10 || pilka.posX < -10 || pilka.posZ < -10 || pilka.posZ > 10 {
+			// powrot do rzutu gdy pilka sie 5 razy odbije od ziemii albo za daleko poleci
+			if odbicie == 5 || pilka.posX > 10 || pilka.posX < -10 || pilka.posZ < -10 || pilka.posZ > 10 {
 				pilka.posX = float64(start_pos_x)
 				pilka.posY = float64(start_pos_y)
 				pilka.posZ = float64(start_pos_z)
