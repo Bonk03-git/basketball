@@ -57,7 +57,6 @@ func main() {
 	const fps = 100
 	const krok_czasowy = 1.0 / fps
 	const g float64 = -9.81
-	const wspolczynnik_odbicia = 0.8
 	const stala_wzrostu_malenia = 1
 	const grubosc_tablicy = 0.01  // metry
 	const szerokosc_tablicy = 1.8 // metry
@@ -65,6 +64,9 @@ func main() {
 	const x_tablicy = 5.0
 	const y_tablicy = 3.0
 	const z_tablicy = 0.0
+	const wspolczynnik_odbicia = 0.8
+	const wspolczynnik_odbicia_od_tablicy = 0.6
+	const wspolczynnik_odbicia_od_obreczy = 0.5
 	const wspolczynnik_momentu = 2.0 / 3.0
 	const wspolczynnik_tarcia = 0.5
 	const wspolczynnik_tangensa = 10.0
@@ -422,7 +424,7 @@ func main() {
 					z: 0,
 				}
 
-				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
+				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia_od_tablicy, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
 
 				for pilka.posY < y_tablicy+wysokosc_tablicy/2 &&
 					pilka.posY > y_tablicy-wysokosc_tablicy/2 &&
@@ -447,7 +449,7 @@ func main() {
 					z: z_tablicy + szerokosc_tablicy/2 - pilka.posZ,
 				}
 
-				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
+				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia_od_tablicy, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
 
 				//zapewnienie wyjścia piłki z obszaru odbicia
 				for pilka.posY < y_tablicy+wysokosc_tablicy/2 &&
@@ -473,7 +475,7 @@ func main() {
 					z: z_tablicy - szerokosc_tablicy/2 - pilka.posZ,
 				}
 
-				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
+				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia_od_tablicy, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
 
 				//zapewnienie wyjścia piłki z obszaru odbicia
 				for pilka.posY < y_tablicy+wysokosc_tablicy/2 &&
@@ -499,7 +501,7 @@ func main() {
 					z: 0,
 				}
 
-				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
+				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia_od_tablicy, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
 
 				//zapewnienie wyjścia piłki z obszaru odbicia
 				for pilka.posZ < z_tablicy+szerokosc_tablicy/2 &&
@@ -525,7 +527,7 @@ func main() {
 					z: 0,
 				}
 
-				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
+				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia_od_tablicy, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
 
 				//zapewnienie wyjścia piłki z obszaru odbicia
 				for pilka.posZ < z_tablicy+szerokosc_tablicy/2 &&
@@ -654,16 +656,32 @@ func main() {
 					z: pozycja_srodka_obreczy.z + normalna.z*promien_obreczy,
 				}
 
-				var wektor_odleglosci_pilki_od_punktu_w_srodku_obreczy = Wektor{
-					x: pilka.posX - punkt_w_obreczy_najblizej_pilki.x,
-					y: pilka.posY - punkt_w_obreczy_najblizej_pilki.y,
-					z: pilka.posZ - punkt_w_obreczy_najblizej_pilki.z,
+				var wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki = Wektor{
+					x: punkt_w_obreczy_najblizej_pilki.x - pilka.posX,
+					y: punkt_w_obreczy_najblizej_pilki.y - pilka.posY,
+					z: punkt_w_obreczy_najblizej_pilki.z - pilka.posZ,
 				}
 
-				odleglosc_pilki_od_punktu_w_obreczy := math.Sqrt(math.Pow(wektor_odleglosci_pilki_od_punktu_w_srodku_obreczy.x, 2) + math.Pow(wektor_odleglosci_pilki_od_punktu_w_srodku_obreczy.y, 2) + math.Pow(wektor_odleglosci_pilki_od_punktu_w_srodku_obreczy.z, 2))
+				odleglosc_pilki_od_punktu_w_obreczy := math.Sqrt(math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.x, 2) + math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.y, 2) + math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.z, 2))
 
 				if odleglosc_pilki_od_punktu_w_obreczy < pilka.promien+promien_przekroju_obreczy {
-					println("zderzenie")
+					println("obrecz")
+
+					odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia_od_obreczy, wspolczynnik_tarcia, wspolczynnik_tangensa, I, wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
+
+					//zapewnienie wyjścia piłki z miejsca odbicia
+					for odleglosc_pilki_od_punktu_w_obreczy < pilka.promien+promien_przekroju_obreczy {
+
+						wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki = Wektor{
+							x: punkt_w_obreczy_najblizej_pilki.x - pilka.posX,
+							y: punkt_w_obreczy_najblizej_pilki.y - pilka.posY,
+							z: punkt_w_obreczy_najblizej_pilki.z - pilka.posZ,
+						}
+
+						odleglosc_pilki_od_punktu_w_obreczy = math.Sqrt(math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.x, 2) + math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.y, 2) + math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.z, 2))
+
+						zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+					}
 				}
 			}
 
@@ -680,7 +698,7 @@ func main() {
 				pilka.rotZ = float64(start_rot_z)
 				licznik = 0
 				licz_wartosci = true
-				faza_gry = 2
+				faza_gry = 0
 				odbicie = 0
 				for i := 0; i < 1; i++ { // todo 1 na 3
 
@@ -708,24 +726,6 @@ func main() {
 
 			rotationAxis = rl.NewVector3(float32(oska[0]), float32(oska[1]), float32(oska[2]))
 			rotationAngle = float32(kat * 180 / math.Pi)
-		}
-
-		if faza_gry == 2 {
-
-			zapisz_obraz(czas, px, "pozycja_x.png")
-			zapisz_obraz(czas, py, "pozycja_y.png")
-			zapisz_obraz(czas, pz, "pozycja_z.png")
-			zapisz_obraz(czas, ox, "obrot_x.png")
-			zapisz_obraz(czas, oy, "obrot_y.png")
-			zapisz_obraz(czas, oz, "obrot_z.png")
-			zapisz_obraz(czas, vx, "predkosc_liniowa_x.png")
-			zapisz_obraz(czas, vy, "predkosc_liniowa_y.png")
-			zapisz_obraz(czas, vz, "predkosc_liniowa_z.png")
-			zapisz_obraz(czas, wx, "predkosc_katowa_x.png")
-			zapisz_obraz(czas, wy, "predkosc_katowa_y.png")
-			zapisz_obraz(czas, wz, "predkosc_katowa_z.png")
-
-			faza_gry = 0
 		}
 
 		rl.BeginDrawing()
@@ -778,6 +778,19 @@ func main() {
 	rl.UnloadModel(sphereModel)
 
 	rl.CloseWindow()
+
+	zapisz_obraz(czas, px, "pozycja_x.png")
+	zapisz_obraz(czas, py, "pozycja_y.png")
+	zapisz_obraz(czas, pz, "pozycja_z.png")
+	zapisz_obraz(czas, ox, "obrot_x.png")
+	zapisz_obraz(czas, oy, "obrot_y.png")
+	zapisz_obraz(czas, oz, "obrot_z.png")
+	zapisz_obraz(czas, vx, "predkosc_liniowa_x.png")
+	zapisz_obraz(czas, vy, "predkosc_liniowa_y.png")
+	zapisz_obraz(czas, vz, "predkosc_liniowa_z.png")
+	zapisz_obraz(czas, wx, "predkosc_katowa_x.png")
+	zapisz_obraz(czas, wy, "predkosc_katowa_y.png")
+	zapisz_obraz(czas, wz, "predkosc_katowa_z.png")
 }
 
 func po_wcisnieciu(zmienna float64, zmiana float64) float64 {
@@ -964,4 +977,5 @@ func zmiana_parametrow_w_czasie(pilka *Kula, predkosci_pilki *Wektor, predkosci_
 	*wy = append(*wy, predkosci_katowe_pilki.y)
 	*wz = append(*wz, predkosci_katowe_pilki.z)
 	*czas = append(*czas, float64(*liczba_krokow)*krok_czasowy)
+
 }
