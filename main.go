@@ -262,7 +262,7 @@ func main() {
 
 			}
 			if licznik == 14 {
-				rl.DrawText(fmt.Sprintf("Wartosc 3. wektora sily w kierunku z = %f [N]", wektory_sily[1].dlugosc_z), 10, 10, 20, rl.DarkGray)
+				rl.DrawText(fmt.Sprintf("Wartosc 3. wektora sily w kierunku z = %f [N]", wektory_sily[2].dlugosc_z), 10, 10, 20, rl.DarkGray)
 				po_wcisnieciu(&wektory_sily[2].dlugosc_z, &licznik, stala_wzrostu_malenia)
 				if wektory_sily[2].dlugosc_z > max_sily {
 					wektory_sily[2].dlugosc_z = max_sily
@@ -283,7 +283,7 @@ func main() {
 			}
 
 			if licznik == 12 {
-				rl.DrawText(fmt.Sprintf("Wartosc 3. wektora sily w kierunku x = %f [N]", wektory_sily[1].dlugosc_x), 10, 10, 20, rl.DarkGray)
+				rl.DrawText(fmt.Sprintf("Wartosc 3. wektora sily w kierunku x = %f [N]", wektory_sily[2].dlugosc_x), 10, 10, 20, rl.DarkGray)
 				po_wcisnieciu(&wektory_sily[2].dlugosc_x, &licznik, stala_wzrostu_malenia)
 				if wektory_sily[2].dlugosc_x > max_sily {
 					wektory_sily[2].dlugosc_x = max_sily
@@ -538,7 +538,7 @@ func main() {
 
 			// powerzchnia tablicy tyl
 
-			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX+pilka.promien < x_tablicy+grubosc_tablicy/2 && pilka.posX > x_tablicy {
+			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX-pilka.promien < x_tablicy+grubosc_tablicy/2 && pilka.posX > x_tablicy {
 
 				println("Uderzona tablica od tylu")
 
@@ -554,7 +554,7 @@ func main() {
 					pilka.posY > y_tablicy-wysokosc_tablicy/2 &&
 					pilka.posZ > z_tablicy-szerokosc_tablicy/2 &&
 					pilka.posZ < z_tablicy+szerokosc_tablicy/2 &&
-					pilka.posX+pilka.promien < x_tablicy+grubosc_tablicy/2 &&
+					pilka.posX-pilka.promien < x_tablicy+grubosc_tablicy/2 &&
 					pilka.posX > x_tablicy {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
@@ -1126,7 +1126,7 @@ func zapisz_obraz(tab_x []float64, tab_y []float64, nazwa string, nazwa_osi_x st
 	}
 }
 func rownaj_do_zera(zmienna float64) float64 {
-	if zmienna < 0.000001 && zmienna > -0.000001 {
+	if zmienna < 0.00001 && zmienna > -0.00001 {
 		zmienna = 0
 	}
 	return zmienna
