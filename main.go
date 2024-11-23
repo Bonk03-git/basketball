@@ -54,7 +54,7 @@ func main() {
 	const szerokosc int = 1600
 	const wysokosc int = 900
 	const czas_dzialania_sily_na_pilke = 0.1
-	const fps = 100
+	const fps = 200 // fpsy dlatego takie duże żeby uwzglednić jak najmniejnsze zmiany pozycji
 	const krok_czasowy = 1.0 / fps
 	const g float64 = -9.81
 	const stala_wzrostu_malenia = 1
@@ -240,6 +240,8 @@ func main() {
 	odbicie := 0
 	czy_byla_krawedz := false
 	czy_byl_rog := false
+	czy_wpadlo := false
+	alfa := float32(1)
 
 	rl.SetTargetFPS(fps)
 
@@ -500,9 +502,9 @@ func main() {
 
 			}
 
-			//powierzchnia tablicy
+			//powierzchnia tablicy przod
 
-			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX+pilka.promien > x_tablicy-grubosc_tablicy/2 && pilka.posX < x_tablicy+grubosc_tablicy/2 {
+			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX+pilka.promien > x_tablicy-grubosc_tablicy/2 && pilka.posX < x_tablicy {
 
 				println("Uderzona tablica")
 
@@ -519,9 +521,51 @@ func main() {
 					pilka.posZ > z_tablicy-szerokosc_tablicy/2 &&
 					pilka.posZ < z_tablicy+szerokosc_tablicy/2 &&
 					pilka.posX+pilka.promien > x_tablicy-grubosc_tablicy/2 &&
-					pilka.posX < x_tablicy+grubosc_tablicy/2 {
+					pilka.posX < x_tablicy {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
+				}
+
+			}
+
+			// powerzchnia tablicy tyl
+
+			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX+pilka.promien < x_tablicy+grubosc_tablicy/2 && pilka.posX > x_tablicy {
+
+				println("Uderzona tablica od tylu")
+
+				var odleglosc_punktu_od_pilki = Wektor{
+					x: x_tablicy - pilka.posX,
+					y: 0,
+					z: 0,
+				}
+
+				odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia_od_tablicy, wspolczynnik_tarcia, wspolczynnik_tangensa, I, odleglosc_punktu_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
+
+				for pilka.posY < y_tablicy+wysokosc_tablicy/2 &&
+					pilka.posY > y_tablicy-wysokosc_tablicy/2 &&
+					pilka.posZ > z_tablicy-szerokosc_tablicy/2 &&
+					pilka.posZ < z_tablicy+szerokosc_tablicy/2 &&
+					pilka.posX+pilka.promien < x_tablicy+grubosc_tablicy/2 &&
+					pilka.posX > x_tablicy {
+
+					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
 				}
 
 			}
@@ -548,6 +592,14 @@ func main() {
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
 				}
 				czy_byla_krawedz = true
 			}
@@ -574,6 +626,14 @@ func main() {
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posZ-z_tablicy+szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
 				}
 				czy_byla_krawedz = true
 			}
@@ -600,6 +660,15 @@ func main() {
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
 				}
 				czy_byla_krawedz = true
 			}
@@ -626,6 +695,15 @@ func main() {
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy+wysokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
 				}
 				czy_byla_krawedz = true
 			}
@@ -648,6 +726,15 @@ func main() {
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
 				}
 				czy_byl_rog = true
 			}
@@ -670,6 +757,15 @@ func main() {
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
 				}
 				czy_byl_rog = true
 			}
@@ -692,6 +788,15 @@ func main() {
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy+wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy+szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
 				}
 				czy_byl_rog = true
 			}
@@ -714,7 +819,17 @@ func main() {
 					math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy+wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) {
 
 					zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+
+					rl.DrawModelEx(
+						sphereModel,
+						rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+						rotationAxis,                 // Rotation axis
+						rotationAngle,                // Rotation angle
+						rl.NewVector3(1.0, 1.0, 1.0), // Scale
+						rl.White,                     // Tint
+					)
 				}
+
 				czy_byl_rog = true
 			}
 
@@ -769,7 +884,30 @@ func main() {
 						odleglosc_pilki_od_punktu_w_obreczy = math.Sqrt(math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.x, 2) + math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.y, 2) + math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.z, 2))
 
 						zmiana_parametrow_w_czasie(&pilka, &predkosci_pilki, &predkosci_katowe_pilki, g, krok_czasowy, &liczba_krokow, &px, &py, &pz, &vx, &vy, &vz, &ox, &oy, &oz, &wx, &wy, &wz, &czas)
+
+						rl.DrawModelEx(
+							sphereModel,
+							rl.NewVector3(float32(pilka.posX), float32(pilka.posY), float32(pilka.posZ)), // Position
+							rotationAxis,                 // Rotation axis
+							rotationAngle,                // Rotation angle
+							rl.NewVector3(1.0, 1.0, 1.0), // Scale
+							rl.White,                     // Tint
+						)
 					}
+				}
+			}
+
+			//wykrycie trafienia
+			if predkosci_pilki.y < 0 && pilka.posY < pozycja_srodka_obreczy.y && pilka.posY > pozycja_srodka_obreczy.y-pilka.promien && math.Pow(pilka.posX-pozycja_srodka_obreczy.x, 2)+math.Pow(pilka.posZ-pozycja_srodka_obreczy.z, 2) < math.Pow(promien_obreczy-pilka.promien, 2) {
+				czy_wpadlo = true
+			}
+
+			if czy_wpadlo == true {
+				rl.DrawRectangle(0, 0, int32(szerokosc), int32(wysokosc), rl.Fade(rl.Green, alfa))
+				alfa -= 2 * krok_czasowy
+				if alfa < 0 {
+					alfa = 1
+					czy_wpadlo = false
 				}
 			}
 
@@ -830,6 +968,7 @@ func main() {
 			rl.NewVector3(1.0, 1.0, 1.0), // Scale
 			rl.White,                     // Tint
 		)
+
 		if faza_gry == 0 {
 			if licznik < 5 {
 				rl.DrawModel(
