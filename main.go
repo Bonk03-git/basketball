@@ -124,7 +124,7 @@ func main() {
 		y: wypadkowa_przyspieszen_katowych.y * czas_dzialania_sily_na_pilke,
 		z: wypadkowa_przyspieszen_katowych.z * czas_dzialania_sily_na_pilke,
 	}
-	for i := 0; i < 1; i++ { //todo 1 na 3
+	for i := 0; i < 3; i++ {
 
 		punkty_przylozenia_wektorow[i] = Punkt_przylozenia{ // wyznaczane przez gracza
 			kat_fi:   3 * math.Pi / 2, //radiany
@@ -176,7 +176,7 @@ func main() {
 	sphereMesh := rl.GenMeshSphere(float32(pilka.promien), 32, 32)
 	sphereModel := rl.LoadModelFromMesh(sphereMesh)
 
-	texture := rl.LoadTexture("basketball.png") // Ensure this file exists
+	texture := rl.LoadTexture("basketball.png")
 
 	materials := sphereModel.GetMaterials()
 
@@ -186,7 +186,7 @@ func main() {
 	punktMesh := rl.GenMeshSphere(float32(pilka.promien/10), 32, 32)
 	punktModel := rl.LoadModelFromMesh(punktMesh)
 
-	texture_1 := rl.LoadTexture("niebieski.png") // Ensure this file exists
+	texture_1 := rl.LoadTexture("bialy.png")
 
 	materials_1 := punktModel.GetMaterials()
 
@@ -249,70 +249,157 @@ func main() {
 		rl.UpdateCamera(&camera, rl.CameraFree)
 
 		if faza_gry == 0 {
-			for i := 0; i < 1; i++ { // todo 1 na 3
-				if licznik == 5 {
-					for j := 0; j < 1; j++ { // todo 1 na 3
-						wektory_sily[j].przylozenie_x = pilka.promien * math.Cos(punkty_przylozenia_wektorow[j].kat_teta) * math.Sin(punkty_przylozenia_wektorow[j].kat_fi)
-						wektory_sily[j].przylozenie_y = pilka.promien * math.Sin(punkty_przylozenia_wektorow[j].kat_teta)
-						wektory_sily[j].przylozenie_z = pilka.promien * math.Cos(punkty_przylozenia_wektorow[j].kat_teta) * math.Cos(punkty_przylozenia_wektorow[j].kat_fi)
-					}
-					faza_gry += 1
 
+			if licznik == 15 {
+				for j := 0; j < 3; j++ {
+					wektory_sily[j].przylozenie_x = pilka.promien * math.Cos(punkty_przylozenia_wektorow[j].kat_teta) * math.Sin(punkty_przylozenia_wektorow[j].kat_fi)
+					wektory_sily[j].przylozenie_y = pilka.promien * math.Sin(punkty_przylozenia_wektorow[j].kat_teta)
+					wektory_sily[j].przylozenie_z = pilka.promien * math.Cos(punkty_przylozenia_wektorow[j].kat_teta) * math.Cos(punkty_przylozenia_wektorow[j].kat_fi)
 				}
+				faza_gry += 1
 
-				if licznik == 4 {
-					rl.DrawText(fmt.Sprintf("Przylozenie sily kat teta = %f", punkty_przylozenia_wektorow[i].kat_teta), 10, 10, 20, rl.DarkGray)
-					punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[i].kat_teta)*math.Sin(punkty_przylozenia_wektorow[i].kat_fi))
-					punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[i].kat_teta))
-					punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[i].kat_teta)*math.Cos(punkty_przylozenia_wektorow[i].kat_fi))
-					po_wcisnieciu(&punkty_przylozenia_wektorow[i].kat_teta, &licznik, math32.Pi/360)
+			}
+			if licznik == 14 {
+				rl.DrawText(fmt.Sprintf("Wartosc 3. wektora sily w kierunku z = %f [N]", wektory_sily[1].dlugosc_z), 10, 10, 20, rl.DarkGray)
+				po_wcisnieciu(&wektory_sily[2].dlugosc_z, &licznik, stala_wzrostu_malenia)
+				if wektory_sily[2].dlugosc_z > max_sily {
+					wektory_sily[2].dlugosc_z = max_sily
 				}
-				if licznik == 3 {
-					rl.DrawText(fmt.Sprintf("Przylozenie sily kat fi = %f", punkty_przylozenia_wektorow[i].kat_fi), 10, 10, 20, rl.DarkGray)
-					punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[i].kat_teta)*math.Sin(punkty_przylozenia_wektorow[i].kat_fi))
-					punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[i].kat_teta))
-					punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[i].kat_teta)*math.Cos(punkty_przylozenia_wektorow[i].kat_fi))
-					po_wcisnieciu(&punkty_przylozenia_wektorow[i].kat_fi, &licznik, math32.Pi/360)
+				if wektory_sily[2].dlugosc_z < -max_sily {
+					wektory_sily[2].dlugosc_z = -max_sily
 				}
-				if licznik == 2 {
-					rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku z= %f", wektory_sily[i].dlugosc_z), 10, 10, 20, rl.DarkGray)
-					po_wcisnieciu(&wektory_sily[i].dlugosc_z, &licznik, stala_wzrostu_malenia)
-					if wektory_sily[i].dlugosc_z > max_sily {
-						wektory_sily[i].dlugosc_z = max_sily
-					}
-					if wektory_sily[i].dlugosc_z < -max_sily {
-						wektory_sily[i].dlugosc_z = -max_sily
-					}
+			}
+			if licznik == 13 {
+				rl.DrawText(fmt.Sprintf("Wartosc 3. wektora sily w kierunku y = %f [N]", wektory_sily[2].dlugosc_y), 10, 10, 20, rl.DarkGray)
+				po_wcisnieciu(&wektory_sily[2].dlugosc_y, &licznik, stala_wzrostu_malenia)
+				if wektory_sily[2].dlugosc_y > max_sily {
+					wektory_sily[2].dlugosc_y = max_sily
 				}
-				if licznik == 1 {
-					rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku y= %f", wektory_sily[i].dlugosc_y), 10, 10, 20, rl.DarkGray)
-					po_wcisnieciu(&wektory_sily[i].dlugosc_y, &licznik, stala_wzrostu_malenia)
-					if wektory_sily[i].dlugosc_y > max_sily {
-						wektory_sily[i].dlugosc_y = max_sily
-					}
-					if wektory_sily[i].dlugosc_y < -max_sily {
-						wektory_sily[i].dlugosc_y = -max_sily
-					}
+				if wektory_sily[2].dlugosc_y < -max_sily {
+					wektory_sily[2].dlugosc_y = -max_sily
 				}
+			}
 
-				if licznik == 0 {
-					rl.DrawText(fmt.Sprintf("Wartosc wektora w kierunku x= %f", wektory_sily[i].dlugosc_x), 10, 10, 20, rl.DarkGray)
-					po_wcisnieciu(&wektory_sily[i].dlugosc_x, &licznik, stala_wzrostu_malenia)
-					if wektory_sily[i].dlugosc_x > max_sily {
-						wektory_sily[i].dlugosc_x = max_sily
-					}
-					if wektory_sily[i].dlugosc_x < -max_sily {
-						wektory_sily[i].dlugosc_x = -max_sily
-					}
+			if licznik == 12 {
+				rl.DrawText(fmt.Sprintf("Wartosc 3. wektora sily w kierunku x = %f [N]", wektory_sily[1].dlugosc_x), 10, 10, 20, rl.DarkGray)
+				po_wcisnieciu(&wektory_sily[2].dlugosc_x, &licznik, stala_wzrostu_malenia)
+				if wektory_sily[2].dlugosc_x > max_sily {
+					wektory_sily[2].dlugosc_x = max_sily
 				}
+				if wektory_sily[2].dlugosc_x < -max_sily {
+					wektory_sily[2].dlugosc_x = -max_sily
+				}
+			}
+			if licznik == 11 {
+				rl.DrawText(fmt.Sprintf("Przylozenie 3. wektora sily kat teta = %f [rad]", punkty_przylozenia_wektorow[2].kat_teta), 10, 10, 20, rl.DarkGray)
+				punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[2].kat_teta)*math.Sin(punkty_przylozenia_wektorow[2].kat_fi))
+				punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[2].kat_teta))
+				punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[2].kat_teta)*math.Cos(punkty_przylozenia_wektorow[2].kat_fi))
+				po_wcisnieciu(&punkty_przylozenia_wektorow[2].kat_teta, &licznik, math32.Pi/360)
+			}
+			if licznik == 10 {
+				rl.DrawText(fmt.Sprintf("Przylozenie 3. wektora sily kat fi = %f [rad]", punkty_przylozenia_wektorow[2].kat_fi), 10, 10, 20, rl.DarkGray)
+				punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[2].kat_teta)*math.Sin(punkty_przylozenia_wektorow[2].kat_fi))
+				punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[2].kat_teta))
+				punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[2].kat_teta)*math.Cos(punkty_przylozenia_wektorow[2].kat_fi))
+				po_wcisnieciu(&punkty_przylozenia_wektorow[2].kat_fi, &licznik, math32.Pi/360)
+			}
+			if licznik == 9 {
+				rl.DrawText(fmt.Sprintf("Wartosc 2. wektora sily w kierunku z = %f [N]", wektory_sily[1].dlugosc_z), 10, 10, 20, rl.DarkGray)
+				po_wcisnieciu(&wektory_sily[1].dlugosc_z, &licznik, stala_wzrostu_malenia)
+				if wektory_sily[1].dlugosc_z > max_sily {
+					wektory_sily[1].dlugosc_z = max_sily
+				}
+				if wektory_sily[1].dlugosc_z < -max_sily {
+					wektory_sily[1].dlugosc_z = -max_sily
+				}
+			}
+			if licznik == 8 {
+				rl.DrawText(fmt.Sprintf("Wartosc 2. wektora sily w kierunku y = %f [N]", wektory_sily[1].dlugosc_y), 10, 10, 20, rl.DarkGray)
+				po_wcisnieciu(&wektory_sily[1].dlugosc_y, &licznik, stala_wzrostu_malenia)
+				if wektory_sily[1].dlugosc_y > max_sily {
+					wektory_sily[1].dlugosc_y = max_sily
+				}
+				if wektory_sily[1].dlugosc_y < -max_sily {
+					wektory_sily[1].dlugosc_y = -max_sily
+				}
+			}
 
+			if licznik == 7 {
+				rl.DrawText(fmt.Sprintf("Wartosc 2. wektora sily w kierunku x = %f [N]", wektory_sily[1].dlugosc_x), 10, 10, 20, rl.DarkGray)
+				po_wcisnieciu(&wektory_sily[1].dlugosc_x, &licznik, stala_wzrostu_malenia)
+				if wektory_sily[1].dlugosc_x > max_sily {
+					wektory_sily[1].dlugosc_x = max_sily
+				}
+				if wektory_sily[1].dlugosc_x < -max_sily {
+					wektory_sily[1].dlugosc_x = -max_sily
+				}
+			}
+			if licznik == 6 {
+				rl.DrawText(fmt.Sprintf("Przylozenie 2. wektora sily kat teta = %f [rad]", punkty_przylozenia_wektorow[1].kat_teta), 10, 10, 20, rl.DarkGray)
+				punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[1].kat_teta)*math.Sin(punkty_przylozenia_wektorow[1].kat_fi))
+				punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[1].kat_teta))
+				punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[1].kat_teta)*math.Cos(punkty_przylozenia_wektorow[1].kat_fi))
+				po_wcisnieciu(&punkty_przylozenia_wektorow[1].kat_teta, &licznik, math32.Pi/360)
+			}
+			if licznik == 5 {
+				rl.DrawText(fmt.Sprintf("Przylozenie 2. wektora sily kat fi = %f [rad]", punkty_przylozenia_wektorow[1].kat_fi), 10, 10, 20, rl.DarkGray)
+				punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[1].kat_teta)*math.Sin(punkty_przylozenia_wektorow[1].kat_fi))
+				punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[1].kat_teta))
+				punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[1].kat_teta)*math.Cos(punkty_przylozenia_wektorow[1].kat_fi))
+				po_wcisnieciu(&punkty_przylozenia_wektorow[1].kat_fi, &licznik, math32.Pi/360)
+			}
+			if licznik == 4 {
+				rl.DrawText(fmt.Sprintf("Wartosc 1. wektora sily w kierunku z = %f [N]", wektory_sily[0].dlugosc_z), 10, 10, 20, rl.DarkGray)
+				po_wcisnieciu(&wektory_sily[0].dlugosc_z, &licznik, stala_wzrostu_malenia)
+				if wektory_sily[0].dlugosc_z > max_sily {
+					wektory_sily[0].dlugosc_z = max_sily
+				}
+				if wektory_sily[0].dlugosc_z < -max_sily {
+					wektory_sily[0].dlugosc_z = -max_sily
+				}
+			}
+			if licznik == 3 {
+				rl.DrawText(fmt.Sprintf("Wartosc 1. wektora sily w kierunku y = %f [N]", wektory_sily[0].dlugosc_y), 10, 10, 20, rl.DarkGray)
+				po_wcisnieciu(&wektory_sily[0].dlugosc_y, &licznik, stala_wzrostu_malenia)
+				if wektory_sily[0].dlugosc_y > max_sily {
+					wektory_sily[0].dlugosc_y = max_sily
+				}
+				if wektory_sily[0].dlugosc_y < -max_sily {
+					wektory_sily[0].dlugosc_y = -max_sily
+				}
+			}
+
+			if licznik == 2 {
+				rl.DrawText(fmt.Sprintf("Wartosc 1. wektora sily w kierunku x = %f [N]", wektory_sily[0].dlugosc_x), 10, 10, 20, rl.DarkGray)
+				po_wcisnieciu(&wektory_sily[0].dlugosc_x, &licznik, stala_wzrostu_malenia)
+				if wektory_sily[0].dlugosc_x > max_sily {
+					wektory_sily[0].dlugosc_x = max_sily
+				}
+				if wektory_sily[0].dlugosc_x < -max_sily {
+					wektory_sily[0].dlugosc_x = -max_sily
+				}
+			}
+			if licznik == 1 {
+				rl.DrawText(fmt.Sprintf("Przylozenie 1. wektora sily kat teta = %f [rad]", punkty_przylozenia_wektorow[0].kat_teta), 10, 10, 20, rl.DarkGray)
+				punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[0].kat_teta)*math.Sin(punkty_przylozenia_wektorow[0].kat_fi))
+				punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[0].kat_teta))
+				punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[0].kat_teta)*math.Cos(punkty_przylozenia_wektorow[0].kat_fi))
+				po_wcisnieciu(&punkty_przylozenia_wektorow[0].kat_teta, &licznik, math32.Pi/360)
+			}
+			if licznik == 0 {
+				rl.DrawText(fmt.Sprintf("Przylozenie 1. wektora sily kat fi = %f [rad]", punkty_przylozenia_wektorow[0].kat_fi), 10, 10, 20, rl.DarkGray)
+				punktPosition.X = float32(pilka.posX + pilka.promien*math.Cos(punkty_przylozenia_wektorow[0].kat_teta)*math.Sin(punkty_przylozenia_wektorow[0].kat_fi))
+				punktPosition.Y = float32(pilka.posY + pilka.promien*math.Sin(punkty_przylozenia_wektorow[0].kat_teta))
+				punktPosition.Z = float32(pilka.posZ + pilka.promien*math.Cos(punkty_przylozenia_wektorow[0].kat_teta)*math.Cos(punkty_przylozenia_wektorow[0].kat_fi))
+				po_wcisnieciu(&punkty_przylozenia_wektorow[0].kat_fi, &licznik, math32.Pi/360)
 			}
 		}
 
 		if faza_gry == 1 {
 
 			if licz_wartosci == true {
-				for i := 0; i < 1; i++ { // todo: zmiana 1 na 3
+				for i := 0; i < 3; i++ {
 
 					sila_ruszajaca[i] = wektory_sily[i].dlugosc_x*wektory_sily[i].przylozenie_x/pilka.promien + wektory_sily[i].dlugosc_y*wektory_sily[i].przylozenie_y/pilka.promien + wektory_sily[i].dlugosc_z*wektory_sily[i].przylozenie_z/pilka.promien
 
@@ -701,7 +788,7 @@ func main() {
 				licz_wartosci = true
 				faza_gry = 0
 				odbicie = 0
-				for i := 0; i < 1; i++ { // todo 1 na 3
+				for i := 0; i < 3; i++ {
 
 					sila_ruszajaca[i] = 0
 					wektory_sily_ruszajacej[i] = zeruj_wektor(wektory_sily_ruszajacej[i])
@@ -743,13 +830,29 @@ func main() {
 			rl.NewVector3(1.0, 1.0, 1.0), // Scale
 			rl.White,                     // Tint
 		)
-		if faza_gry == 0 && licznik > 2 {
-			rl.DrawModel(
-				punktModel,
-				punktPosition,
-				1,
-				rl.White,
-			)
+		if faza_gry == 0 {
+			if licznik < 5 {
+				rl.DrawModel(
+					punktModel,
+					punktPosition,
+					1,
+					rl.DarkBlue,
+				)
+			} else if licznik < 10 {
+				rl.DrawModel(
+					punktModel,
+					punktPosition,
+					1,
+					rl.DarkGreen,
+				)
+			} else {
+				rl.DrawModel(
+					punktModel,
+					punktPosition,
+					1,
+					rl.Red,
+				)
+			}
 		}
 		rl.DrawModel(
 			basketModel,
@@ -811,7 +914,6 @@ func po_wcisnieciu(zmienna *float64, licznik *int, zmiana float64) {
 		*licznik++
 	}
 }
-
 func iloczyn_wektorowy(wektor_1 Wektor, wektor_2 Wektor) Wektor {
 	return Wektor{
 		x: wektor_1.y*wektor_2.z - wektor_1.z*wektor_2.y,
@@ -819,7 +921,6 @@ func iloczyn_wektorowy(wektor_1 Wektor, wektor_2 Wektor) Wektor {
 		z: wektor_1.x*wektor_2.y - wektor_1.y*wektor_2.x,
 	}
 }
-
 func zapisz_obraz(tab_x []float64, tab_y []float64, nazwa string, nazwa_osi_x string, nazwa_osi_y string) {
 
 	graph := chart.Chart{
@@ -885,7 +986,6 @@ func zapisz_obraz(tab_x []float64, tab_y []float64, nazwa string, nazwa_osi_x st
 		panic(err)
 	}
 }
-
 func rownaj_do_zera(zmienna float64) float64 {
 	if zmienna < 0.000001 && zmienna > -0.000001 {
 		zmienna = 0
