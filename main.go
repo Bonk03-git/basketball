@@ -24,17 +24,17 @@ type Kula struct {
 }
 
 type Punkt_przylozenia struct {
-	kat_fi   float64 // wspolrzedne sferyczne punktu przylozenia 0 ; 2pi
-	kat_teta float64 // -pi/2 ; pi/2
+	kat_fi   float64 // wspolrzedne sferyczne punktu przylozenia
+	kat_teta float64
 }
 
 type Wektor_sily struct {
-	dlugosc_x     float64 // pixele
-	dlugosc_y     float64 // pixele
-	dlugosc_z     float64 // pixele
-	przylozenie_x float64 // pixele przylozenia sa wzgledem srodka pilki
-	przylozenie_y float64 // pixele
-	przylozenie_z float64 // pixele
+	dlugosc_x     float64 // Niutony
+	dlugosc_y     float64
+	dlugosc_z     float64
+	przylozenie_x float64 // metry, przylozenia sa wzgledem srodka pilki
+	przylozenie_y float64
+	przylozenie_z float64
 }
 
 type Wektor struct {
@@ -53,8 +53,8 @@ func main() {
 
 	const szerokosc int = 1600
 	const wysokosc int = 900
-	const czas_dzialania_sily_na_pilke = 0.1
-	const fps = 200 // fpsy dlatego takie duże żeby uwzglednić jak najmniejnsze zmiany pozycji
+	const czas_dzialania_sily_na_pilke = 0.1 // sekundy
+	const fps = 200                          // fpsy dlatego takie duze zeby uwzglednic jak najmniejnsze zmiany pozycji
 	const krok_czasowy = 1.0 / fps
 	const g float64 = -9.81
 	const stala_wzrostu_malenia = 1
@@ -70,7 +70,7 @@ func main() {
 	const wspolczynnik_momentu = 2.0 / 3.0
 	const wspolczynnik_tarcia = 0.5
 	const wspolczynnik_tangensa = 10.0
-	const srednica_obreczy = 0.5
+	const srednica_obreczy = 0.5 // metry
 	const stosunek_promienia_obreczy_do_promienia_przekroju = 0.1
 	const max_sily = 50.0
 
@@ -126,16 +126,16 @@ func main() {
 	}
 	for i := 0; i < 3; i++ {
 
-		punkty_przylozenia_wektorow[i] = Punkt_przylozenia{ // wyznaczane przez gracza
-			kat_fi:   3 * math.Pi / 2, //radiany
-			kat_teta: 0,               // radiany
+		punkty_przylozenia_wektorow[i] = Punkt_przylozenia{ // wyznaczane przez gracza, radiany
+			kat_fi:   3 * math.Pi / 2,
+			kat_teta: 0,
 		}
 
 		wektory_sily[i] = Wektor_sily{
-			dlugosc_x:     0, // wyznacza gracz Niutony
+			dlugosc_x:     0, // wyznacza gracz, Niutony
 			dlugosc_y:     0,
 			dlugosc_z:     0,
-			przylozenie_x: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Sin(punkty_przylozenia_wektorow[i].kat_fi), //metry
+			przylozenie_x: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Sin(punkty_przylozenia_wektorow[i].kat_fi),
 			przylozenie_y: pilka.promien * math.Sin(punkty_przylozenia_wektorow[i].kat_teta),
 			przylozenie_z: pilka.promien * math.Cos(punkty_przylozenia_wektorow[i].kat_teta) * math.Cos(punkty_przylozenia_wektorow[i].kat_fi),
 		}
@@ -206,11 +206,11 @@ func main() {
 
 	basketPosition := rl.NewVector3(x_tablicy, y_tablicy, z_tablicy)
 
-	//obrecz
+	// obrecz
 	hoopMesh := rl.GenMeshTorus(stosunek_promienia_obreczy_do_promienia_przekroju, srednica_obreczy, 16, 32)
 	hoopModel := rl.LoadModelFromMesh(hoopMesh)
 
-	texture_3 := rl.LoadTexture("czerwony.jpg")
+	texture_3 := rl.LoadTexture("bialy.png")
 
 	materials_3 := hoopModel.GetMaterials()
 	rl.SetMaterialTexture(&materials_3[0], rl.MapDiffuse, texture_3)
@@ -232,7 +232,7 @@ func main() {
 	rotationAngle_2 := float32(90.0)
 	rotationAxis_2 := rl.NewVector3(1.0, 0.0, 0.0)
 
-	//inicjalizacja wartości zmiennych odpowiadających za fazy programu
+	// inicjalizacja wartości zmiennych odpowiadających za fazy programu
 
 	licznik := 0
 	licz_wartosci := true
@@ -245,11 +245,11 @@ func main() {
 
 	rl.SetTargetFPS(fps)
 
-	// Main game loop
+	// Petla glowna
 	for !rl.WindowShouldClose() {
 
 		rl.UpdateCamera(&camera, rl.CameraFree)
-
+		//nadanie wartosci sil
 		if faza_gry == 0 {
 
 			if licznik == 15 {
@@ -397,7 +397,7 @@ func main() {
 				po_wcisnieciu(&punkty_przylozenia_wektorow[0].kat_fi, &licznik, math32.Pi/360)
 			}
 		}
-
+		// liczenie predkosci z sil i symulacja ruchu
 		if faza_gry == 1 {
 
 			if licz_wartosci == true {
@@ -1006,7 +1006,7 @@ func main() {
 			rotationAxis_2,
 			rotationAngle_2,
 			rl.NewVector3(1.0, 1.0, 1.0),
-			rl.White,
+			rl.Red,
 		)
 
 		rl.DrawGrid(100, 1.0)
@@ -1021,7 +1021,7 @@ func main() {
 	rl.UnloadModel(sphereModel)
 
 	rl.CloseWindow()
-
+	//zapis do plikow png
 	zapisz_obraz(czas, px, "pozycja_x.png", "Czas [s]", "Pozycja wzdluz osi X [m]")
 	zapisz_obraz(czas, py, "pozycja_y.png", "Czas [s]", "Pozycja wzdluz osi Y [m]")
 	zapisz_obraz(czas, pz, "pozycja_z.png", "Czas [s]", "Pozycja wzdluz osi Z [m]")
