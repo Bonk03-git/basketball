@@ -43,10 +43,6 @@ type Wektor struct {
 	z float64
 }
 
-func (w Wektor) String() string {
-	return fmt.Sprintf("[%v, %v, %v]", w.x, w.y, w.z)
-}
-
 func main() {
 
 	rand.NewSource(time.Now().UnixNano())
@@ -410,33 +406,24 @@ func main() {
 						y: sila_ruszajaca[i] * wektory_sily[i].przylozenie_y / pilka.promien,
 						z: sila_ruszajaca[i] * wektory_sily[i].przylozenie_z / pilka.promien,
 					}
-					println("wektor siły ruszjacej")
-					println(wektory_sily_ruszajacej[i].String())
 
 					przyspieszenia_z_wektorow[i] = Wektor{
 						x: wektory_sily_ruszajacej[i].x / pilka.masa,
 						y: wektory_sily_ruszajacej[i].y / pilka.masa,
 						z: wektory_sily_ruszajacej[i].z / pilka.masa,
 					}
-					println("przyspieszenia")
-					println(przyspieszenia_z_wektorow[i].String())
 
 					momenty_z_wektorow[i] = Wektor{
 						x: wektory_sily[i].przylozenie_y*wektory_sily[i].dlugosc_z - wektory_sily[i].przylozenie_z*wektory_sily[i].dlugosc_y,
 						y: wektory_sily[i].przylozenie_z*wektory_sily[i].dlugosc_x - wektory_sily[i].przylozenie_x*wektory_sily[i].dlugosc_z,
 						z: wektory_sily[i].przylozenie_x*wektory_sily[i].dlugosc_y - wektory_sily[i].przylozenie_y*wektory_sily[i].dlugosc_x,
 					}
-					println("momenty wektorow")
-					println(momenty_z_wektorow[i].String())
 
 					przyspieszenia_katowe_z_wektorow[i] = Wektor{
 						x: momenty_z_wektorow[i].x / I,
 						y: momenty_z_wektorow[i].y / I,
 						z: momenty_z_wektorow[i].z / I,
 					}
-
-					println("przyspieszenia_katowe_z_wektorow")
-					println(przyspieszenia_katowe_z_wektorow[i].String())
 
 					wypadkowa_przyspieszen = Wektor{
 						x: wypadkowa_przyspieszen.x + przyspieszenia_z_wektorow[i].x,
@@ -449,8 +436,6 @@ func main() {
 						y: wypadkowa_przyspieszen_katowych.y + przyspieszenia_katowe_z_wektorow[i].y,
 						z: wypadkowa_przyspieszen_katowych.z + przyspieszenia_katowe_z_wektorow[i].z,
 					}
-					println("wypadkowa_przyspieszen_katowych")
-					println(wypadkowa_przyspieszen_katowych.String())
 				}
 
 				predkosci_pilki = Wektor{
@@ -463,8 +448,6 @@ func main() {
 					y: rownaj_do_zera(predkosci_pilki.y),
 					z: rownaj_do_zera(predkosci_pilki.z),
 				}
-				println("predkosci_pilki")
-				println(predkosci_pilki.String())
 				predkosci_katowe_pilki = Wektor{
 					x: wypadkowa_przyspieszen_katowych.x * czas_dzialania_sily_na_pilke,
 					y: wypadkowa_przyspieszen_katowych.y * czas_dzialania_sily_na_pilke,
@@ -475,9 +458,6 @@ func main() {
 					y: rownaj_do_zera(predkosci_katowe_pilki.y),
 					z: rownaj_do_zera(predkosci_katowe_pilki.z),
 				}
-
-				println("predkosci_katowe_pilki")
-				println(predkosci_katowe_pilki.String())
 
 				licz_wartosci = false
 			}
@@ -505,8 +485,6 @@ func main() {
 			//powierzchnia tablicy przod
 
 			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX+pilka.promien > x_tablicy-grubosc_tablicy/2 && pilka.posX < x_tablicy {
-
-				println("Uderzona tablica")
 
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
@@ -540,8 +518,6 @@ func main() {
 
 			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posX-pilka.promien < x_tablicy+grubosc_tablicy/2 && pilka.posX > x_tablicy {
 
-				println("Uderzona tablica od tylu")
-
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
 					y: 0,
@@ -573,7 +549,6 @@ func main() {
 			//krawedz prawa
 
 			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posX > x_tablicy-grubosc_tablicy/2-pilka.promien && pilka.posX < x_tablicy+grubosc_tablicy/2+pilka.promien && pilka.posZ > z_tablicy+szerokosc_tablicy/2 && (math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2)) < math.Pow(pilka.promien, 2) && !czy_byl_rog {
-				println("krawedz prawa")
 
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
@@ -607,7 +582,6 @@ func main() {
 			//krawedz lewa
 
 			if pilka.posY < y_tablicy+wysokosc_tablicy/2 && pilka.posY > y_tablicy-wysokosc_tablicy/2 && pilka.posX > x_tablicy-grubosc_tablicy/2-pilka.promien && pilka.posX < x_tablicy+grubosc_tablicy/2+pilka.promien && pilka.posZ < z_tablicy-szerokosc_tablicy/2 && (math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posZ-z_tablicy+szerokosc_tablicy/2, 2)) < math.Pow(pilka.promien, 2) && !czy_byl_rog {
-				println("krawedz lewa")
 
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
@@ -641,7 +615,6 @@ func main() {
 			//krawedz gora
 
 			if pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posX > x_tablicy-grubosc_tablicy/2-pilka.promien && pilka.posX < x_tablicy+grubosc_tablicy/2+pilka.promien && pilka.posY > y_tablicy+wysokosc_tablicy/2 && (math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)) < math.Pow(pilka.promien, 2) && !czy_byl_rog {
-				println("krawedz gora")
 
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
@@ -676,7 +649,6 @@ func main() {
 			//krawedz dol
 
 			if pilka.posZ < z_tablicy+szerokosc_tablicy/2 && pilka.posZ > z_tablicy-szerokosc_tablicy/2 && pilka.posX > x_tablicy-grubosc_tablicy/2-pilka.promien && pilka.posX < x_tablicy+grubosc_tablicy/2+pilka.promien && pilka.posY < y_tablicy-wysokosc_tablicy/2 && (math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy+wysokosc_tablicy/2, 2)) < math.Pow(pilka.promien, 2) && !czy_byl_rog {
-				println("krawedz dol")
 
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
@@ -710,7 +682,6 @@ func main() {
 
 			// prawy gorny rog
 			if pilka.posZ > z_tablicy+szerokosc_tablicy/2 && pilka.posY > y_tablicy+wysokosc_tablicy/2 && math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) && !czy_byla_krawedz {
-				println("prawy gorny rog")
 
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
@@ -741,7 +712,6 @@ func main() {
 
 			// lewy gorny rog
 			if pilka.posZ < z_tablicy-szerokosc_tablicy/2 && pilka.posY > y_tablicy+wysokosc_tablicy/2 && math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy-wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy+szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) && !czy_byla_krawedz {
-				println("lewy gorny rog")
 
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
@@ -772,7 +742,6 @@ func main() {
 
 			// lewy dolny rog
 			if pilka.posZ < z_tablicy-szerokosc_tablicy/2 && pilka.posY < y_tablicy-wysokosc_tablicy/2 && math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy+wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy+szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) && !czy_byla_krawedz {
-				println("lewy dolny rog")
 
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
@@ -803,7 +772,6 @@ func main() {
 
 			// prawy dolny rog
 			if pilka.posZ > z_tablicy+szerokosc_tablicy/2 && pilka.posY < y_tablicy-wysokosc_tablicy/2 && math.Pow(pilka.posX-x_tablicy, 2)+math.Pow(pilka.posY-y_tablicy+wysokosc_tablicy/2, 2)+math.Pow(pilka.posZ-z_tablicy-szerokosc_tablicy/2, 2) < math.Pow(pilka.promien, 2) && !czy_byla_krawedz {
-				println("prawy dolny rog")
 
 				var odleglosc_punktu_od_pilki = Wektor{
 					x: x_tablicy - pilka.posX,
@@ -868,7 +836,6 @@ func main() {
 				odleglosc_pilki_od_punktu_w_obreczy := math.Sqrt(math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.x, 2) + math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.y, 2) + math.Pow(wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki.z, 2))
 
 				if odleglosc_pilki_od_punktu_w_obreczy < pilka.promien+promien_przekroju_obreczy {
-					println("obrecz")
 
 					odbij(pilka.promien, pilka.masa, krok_czasowy, wspolczynnik_odbicia_od_obreczy, wspolczynnik_tarcia, wspolczynnik_tangensa, I, wektor_odleglosci_punktu_w_srodku_obreczy_od_pilki, &predkosci_pilki, &predkosci_katowe_pilki)
 
